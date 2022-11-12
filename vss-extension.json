@@ -1,0 +1,64 @@
+{
+    "manifestVersion": 1,
+    "id": "AzureContainerAppsRC",
+    "name": "Azure Container Apps Deploy (Release Candidate)",
+    "version": "0.1.7",
+    "publisher": "microsoft-oryx",
+    "public": true,
+    "targets": [
+        {
+            "id": "Microsoft.VisualStudio.Services"
+        }
+    ],
+    "description": "An Azure DevOps Task to build and deploy Azure Container Apps.",
+    "categories": [
+        "Azure Pipelines"
+    ],
+    "Tags": [
+        "Azure",
+        "Container Apps",
+        "Deployment",
+        "Release"
+    ],
+    "branding": {
+        "color": "#FFFFFF",
+        "theme": "light"
+    },
+    "links": {
+        "home": {
+            "uri": "https://github.com/azure/container-apps-deploy-pipelines-task"
+        },
+        "support": {
+            "uri": "https://github.com/azure/container-apps-deploy-pipelines-task/issues"
+        }
+    },
+    "icons": {
+        "default": "icon.png"
+    },
+    "repository": {
+        "type": "git",
+        "uri": "https://github.com/azure/container-apps-deploy-pipelines-task"
+    },
+    "files": [
+        {
+            "path": "azurecontainerapps"
+        }
+    ],
+    "contributions": [
+        {
+            "id": "container-apps-deploy-pipelines-task",
+            "type": "ms.vss-distributed-task.task",
+            "targets": [
+                "ms.vss-distributed-task.task"
+            ],
+            "properties": {
+                "name": "azurecontainerapps"
+            }
+        }
+    ],
+    "content": {
+        "details": {
+            "path": "overview.md"
+        }
+    }
+}
