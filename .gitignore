@@ -348,3 +348,12 @@ MigrationBackup/
 
 # Ionide (cross platform F# VS Code tools) working folder
 .ionide/
+
+# Ignore Tests folder copied over from stable task
+azurecontainerapps/Tests/
+
+# Ignore .js files generated via tsc
+*.js
+
+# Ignore .vsix files generated via tfx-cli
+*.vsix

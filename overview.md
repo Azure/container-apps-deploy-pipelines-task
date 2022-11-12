@@ -2,8 +2,8 @@
 
 ## Important note
 
-The `AzureContainerAppsRC` task found in this repository is the _Release Candidate (RC)_ version of the
-`AzureContainerApps` task that ships out of the box with Azure Pipelines, which can be found
+The `AzureContainerAppsRC` task is the _Release Candidate (RC)_ version of the `AzureContainerApps` task that ships out
+of the box with Azure Pipelines, which can be found
 [here](https://github.com/microsoft/azure-pipelines-tasks/tree/master/Tasks/AzureContainerAppsV0). The intended purpose
 of this Release Candidate task is to offer users immediate early access to features, bug fixes and patches that will
 eventually be rolled out in the official `AzureContainerApps` task at the end of every three week sprint.
@@ -296,7 +296,7 @@ contact [opencode@microsoft.com](mailto:opencode@microsoft.com) with any additio
 ## Issues and feedback
 
 For any issues and feedback for the _Release Candidate_ `AzureContainerAppsRC` task, please create a new issue
-[in this `container-apps-deploy-pipelines-task` repository](https://github.com/azure/container-apps-deploy-pipelines-task/issues).
+[in the `container-apps-deploy-pipelines-task` repository](https://github.com/azure/container-apps-deploy-pipelines-task/issues).
 
 For any issues and feedback for the _official_ `AzureContainerApps` task, please create a new issue
 [in the `azure-pipelines-tasks` repository](https://github.com/microsoft/azure-pipelines-tasks/issues).
