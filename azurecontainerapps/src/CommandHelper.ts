@@ -38,4 +38,33 @@ export class CommandHelper {
             throw err;
         }
     }
+
+    public async execPwshCommandAsync(command: string, cwd?: string): Promise<string> {
+        try {
+            if (!cwd) {
+                cwd = tl.getPathInput('cwd', true, false);
+            }
+
+            const pwshPath: string = tl.which('pwsh', true);
+            const pwshCmd = tl.tool(pwshPath)
+                            .arg('-command')
+                            .arg(command);
+            const pwshOptions = <tr.IExecOptions> {
+                cwd: cwd,
+                failOnStdErr: true,
+                errStream: process.stderr,
+                outStream: process.stdout,
+                ignoreReturnCode: false                
+            };
+            let pwshOutput = '';
+            pwshCmd.on('stdout', (data) => {
+                pwshOutput += data.toString();
+            });
+            await pwshCmd.exec(pwshOptions);
+            return pwshOutput.trim();
+        } catch (err) {
+            tl.error(tl.loc('PwshCommandFailed', command));
+            throw err;            
+        }
+    }
 }

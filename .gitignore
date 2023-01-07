@@ -357,3 +357,6 @@ azurecontainerapps/Tests/
 
 # Ignore .vsix files generated via tfx-cli
 *.vsix
+
+# Ignore file history
+.history/
