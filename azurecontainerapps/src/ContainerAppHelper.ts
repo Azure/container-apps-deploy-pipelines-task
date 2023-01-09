@@ -1,4 +1,5 @@
 import * as tl from 'azure-pipelines-task-lib/task';
+import os from 'os';
 import { CommandHelper } from './CommandHelper';
 
 const ORYX_CLI_IMAGE: string = 'cormtestacr.azurecr.io/oryx/cli:latest';
@@ -118,9 +119,23 @@ export class ContainerAppHelper {
      public async installPackCliAsync() {
         tl.debug('Attempting to install the pack CLI');
         try {
-            const command: string = '(curl -sSL \"https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-linux.tgz\" | ' +
-                                  'tar -C /usr/local/bin/ --no-same-owner -xzv pack)';
-            await new CommandHelper().execBashCommandAsync(command);
+            if (os.platform() == 'win32') {
+                let packUri = 'https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-win32.zip';
+                let downloadFile = 'C:\\Temp\\pack-v0.27.0-win32.zip';
+
+                const command: string = `(Invoke-WebRequest -Uri ${packUri} -OutFile ${downloadFile}; ` +
+                    `$ExtractPath = "C:\\Temp\\pack\\; ` +
+                    `$ExtractShell = New-Object -ComObject Shell.Application; ` + 
+                    `$ExtractFiles = $ExtractShell.Namespace(${downloadFile}).Items(); ` +
+                    `$ExtractShell.NameSpace($ExtractPath).CopyHere($ExtractFiles); ` +
+                    `Start-Process $ExtractPath`;
+                
+                await new CommandHelper().execPwshCommandAsync(command);
+            } else {
+                const command: string = '(curl -sSL \"https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-linux.tgz\" | ' +
+                    'tar -C /usr/local/bin/ --no-same-owner -xzv pack)';
+                await new CommandHelper().execBashCommandAsync(command);
+            }
         } catch (err) {
             tl.error(tl.loc('PackCliInstallFailed'));
             throw err;
