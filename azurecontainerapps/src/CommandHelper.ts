@@ -45,7 +45,7 @@ export class CommandHelper {
                 cwd = tl.getPathInput('cwd', true, false);
             }
 
-            const pwshPath: string = tl.which('pwsh', true);
+            const pwshPath: string = tl.which('pwsh.exe', true);
             const pwshCmd = tl.tool(pwshPath)
                             .arg('-command')
                             .arg(command);
