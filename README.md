@@ -79,18 +79,31 @@ additional time.
 
 ## Arguments
 
-Below are the arguments that can be provided to this task.
+Below are the arguments that can be provided to the Azure Container Apps Build and Deploy Azure DevOps Task.
+
+_Note_: Although no argument is officially marked as "required" in the metadata of this task, some arguments will
+need to be provided in order for this task to successfully run using one of the two main scenarios.
+
+| Argument name             | Required | Description |
+| ------------------------- | -------- | ----------- |
+| `acrName`                 | Yes (for this scenario) | The name of the Azure Container Registry that the runnable application image will be pushed to. |
+| `appSourcePath`           | Yes (for this scenario) | Absolute path on the Azure Pipelines agent of the source application code to be built. |
+
+### Arguments required for using an already pushed application image
+
+| Argument name             | Required | Description |
+| ------------------------- | -------- | ----------- |
+| `imageToDeploy`           | Yes (for this scenario) | The name of the image that has already been pushed to a registry and will be deployed to the Container App by this task. If this image is found in an ACR instance that requires authentication to pull, the `acrName` argument, or the `acrUsername` and `acrPassword` arguments, can be provided to authenticate requests to the ACR instance. |
+
+### Additional arguments
 
 | Argument name             | Required | Description |
 | ------------------------- | -------- | ----------- |
 | `connectedServiceNameARM` | Yes      | Service connection linked to the user's Azure Subscription where the Container App will be created/updated. This service connection _must_ have proper permissions to make these changes within the subscription (_e.g._, Contributor role). |
-| `appSourcePath`           | No       | Absolute path on the Azure Pipelines agent of the source application code to be built. |
-| `acrName`                 | Yes      | The name of the Azure Container Registry that the runnable application image will be pushed to. |
 | `acrUsername`             | No       | The username used to authenticate push requests to the provided Azure Container Registry. If not provided, an access token will be generated via "az acr login" and provided to "docker login" to authenticate the requests. |
 | `acrPassword`             | No       | The password used to authenticate push requests to the provided Azure Container Registry. If not provided, an access token will be generated via "az acr login" and provided to "docker login" to authenticate the requests. |
-| `dockerfilePath`          | No       | Relative path (_without file prefixes, see example below_) to the Dockerfile in the provided application source that should be used to build the image that is then pushed to ACR and deployed to the Container App. If not provided, this action will check if there is a file named `Dockerfile` in the provided application source and use that to build the image. Otherwise, the Oryx++ Builder will be used to create the image. |
-| `imageToBuild`            | No       | The custom name of the image that is to be built, pushed to ACR and deployed to the Container App by this action. _Note_: this image name should include the ACR server; _e.g._, `<acr-name>.azurecr.io/<repo>:<tag>`. If this argument is not provided, a default image name will be constructed in the form `<acr-name>.azurecr.io/ado-task/container-app:<build-id>.<build-number>` |
-| `imageToDeploy`           | No       | The custom name of the image that has already been pushed to ACR and will be deployed to the Container App by this action. _Note_: this image name should include the ACR server; _e.g._, `<acr-name>.azurecr.io/<repo>:<tag>`. If this argument is not provided, the value provided (or determined) for the `imageToBuild` argument will be used. |
+| `dockerfilePath`          | No       | Relative path (_without file prefixes, see example below_) to the Dockerfile in the provided application source that should be used to build the image that is then pushed to ACR and deployed to the Container App. If not provided, this task will check if there is a file named `Dockerfile` in the provided application source and use that to build the image. Otherwise, the Oryx++ Builder will be used to create the image. |
+| `imageToBuild`            | No       | The custom name of the image that is to be built, pushed to ACR and deployed to the Container App by this task. _Note_: this image name should include the ACR server; _e.g._, `<acr-name>.azurecr.io/<repo>:<tag>`. If this argument is not provided, a default image name will be constructed in the form `<acr-name>.azurecr.io/ado-task/container-app:<build-id>.<build-number>` |
 | `containerAppName`        | No       | The name of the Container App that will be created or updated. If not provided, this value will be `ado-task-app-<build-id>-<build-number>`. |
 | `resourceGroup`           | No       | The resource group that the Container App will be created in, or currently exists in. If not provided, this value will be `<container-app-name>-rg`. |
 | `containerAppEnvironment` | No       | The name of the Container App environment to use with the application. If not provided, an existing environment in the resource group of the Container App will be used, otherwise, an environment will be created in the formation `<container-app-name>-env`. |
@@ -101,186 +114,185 @@ Below are the arguments that can be provided to this task.
 
 Below are a set of examples outlining how to use this task in different scenarios.
 
-### Minimal
+### Minimal - Build application image for Container App
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
+```
+
+This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new resource group named
+`<container-app-name>-rg`. The Container App will be based off of an image that was built from the provided
+`appSourcePath` and pushed to the provided ACR instance. An access token will be generated to authenticate the push to
+the provided ACR instance.
+
+### Minimal - Use previously published image for Container App
+
+```yml
+steps:
+
+  - task: AzureContainerAppsRC@0
+    displayName: Build and deploy Container App
+    inputs:
+      connectedServiceNameARM: 'azure-subscription-service-connection'
+      imageToDeploy: mcr.microsoft.com/azuredocs/containerapps-helloworld:latest
+```
+
+This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new resource group named
+`<container-app-name>-rg` where **no new image is built**, but an existing image named
+`mcr.microsoft.com/azuredocs/containerapps-helloworld:latest` will be used for the Container App.
+
+### Using ACR credentials to authenticate
+
+```yml
+steps:
+
+  - task: AzureContainerAppsRC@0
+    displayName: Build and deploy Container App
+    inputs:
+      connectedServiceNameARM: 'azure-subscription-service-connection'
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
       acrUsername: $(ACR_USERNAME_SECRET)
       acrPassword: $(ACR_PASSWORD_SECRET)
 ```
 
 This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new resource group named
-`<container-app-name>-rg`. The provided Azure Container Registry credentials will be used to authenticate any calls
-made against the 'sampleacr' instance.
+`<container-app-name>-rg`. The Container App will be based off of an image that was built from the provided
+`appSourcePath` and pushed to the provided ACR instance. The provided ACR credentials will be used to authenticate calls
+to the ACR instance.
 
 ### Container App name provided
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
-      containerAppName: 'test-container-app-123'
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
+      containerAppName: 'my-test-container-app'
 ```
 
-This will create a new Container App named `test-container-app-123` in a new resource group named
-`test-container-app-123-rg`.
+This will create a new Container App named `my-test-container-app` in a new resource group name
+`my-test-container-app-rg`.
 
 ### Resource group provided
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
-      resourceGroup: 'test-container-app-rg'
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
+      resourceGroup: 'my-test-rg'
 ```
 
-This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new
-resource group named `test-container-app-rg`.
+This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a resource group named
+`my-test-rg`. If the `my-test-rg` resource group does not exist, it will be created as a part of this task.
 
 ### Container App name and resource group provided
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
-      containerAppName: 'test-container-app-123'
-      resourceGroup: 'test-container-app-rg'
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
+      containerAppName: 'my-test-container-app'
+      resourceGroup: 'my-test-rg'
 ```
 
-If the `test-container-app-rg` resource group does not exist, this will create the resource group and create a new
-Container App named `test-container-app-123` within the resource group. If the resource group already exists, this will
-create a new Container App named `test-container-app-123` in the resource group, or update the Container App if it
-already exists within the resource group.
+This will create a new Container App named `my-test-container-app` in a resource group named `my-test-rg`. If the
+`my-test-rg` resource group does not exist, it will be created as a part of this task.
 
 ### Container App environment provided
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
-      containerAppEnvironment: 'test-container-app-123-env'
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
+      containerAppEnvironment: 'my-test-container-app-env'
 ```
 
-This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new
-resource group named `<container-app-name>-rg` with a new Container App environment named `test-container-app-123-env`.
+This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new resource group named
+`<container-app-name>-rg` with a new Container App environment named `my-test-container-app-env`.
 
 ### Runtime stack provided
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
       runtimeStack: 'dotnetcore:7.0'
 ```
 
-This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new
-resource group named `<container-app-name>-rg` where the runnable application image is using the .NET 7 runtime stack.
+This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new resource group named
+`<container-app-name>-rg` where the runnable application image is using the .NET 7 runtime stack.
 
 ### Dockerfile provided
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
       dockerfilePath: 'test.Dockerfile'
 ```
 
-This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new
-resource group named `<container-app-name>-rg` where the runnable application image was created from the `test.Dockerfile`
-file found in the provided application source path directory.
+This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new resource group named
+`<container-app-name>-rg` where the runnable application image was created from the `test.Dockerfile` file found in the
+provided application source path directory.
 
-_Note_: for values provided to `dockerfilePath`, no file prefixes should be included (_e.g._, `./test.Dockerfile` should be
-passed as just `test.Dockerfile`). The provided `appSourcePath` and `dockerfilePath` arguments will be concatenated inside
-of the Azure DevOps task.
+_Note_: for values provided to `dockerfilePath`, no file prefixes should be included (_e.g._, `./test.Dockerfile` should
+be passed as just `test.Dockerfile`). The provided `appSourcePath` and `dockerfilePath` arguments will be concatenated
+inside of the task.
 
 ### Image to build provided
 
 ```yml
 steps:
 
-  - task: AzureContainerAppsRC@V0
+  - task: AzureContainerAppsRC@0
     displayName: Build and deploy Container App
     inputs:
       connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
-      imageToBuild: 'sampleacr.azurecr.io/app:latest'
+      appSourcePath: '$(System.DefaultWorkingDirectory)'
+      acrName: 'mytestacr'
+      imageToBuild: 'mytestacr.azurecr.io/app:latest'
 ```
 
 This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new
 resource group named `<container-app-name>-rg` where the image built and pushed to ACR is named
-`sampleacr.azurecr.io/app:latest`
-
-### Image to deploy provided
-
-```yml
-steps:
-
-  - task: AzureContainerAppsRC@V0
-    displayName: Build and deploy Container App
-    inputs:
-      connectedServiceNameARM: 'azure-subscription-service-connection'
-      appSourcePath: '$(System.DefaultWorkingDirectory)/folder-containing-app-source'
-      acrName: 'sampleacr'
-      acrUsername: $(ACR_USERNAME_SECRET)
-      acrPassword: $(ACR_PASSWORD_SECRET)
-      imageToDeploy: 'sampleacr.azurecr.io/app:latest'
-```
-
-This will create a new Container App named `ado-task-app-<build-id>-<build-number>` in a new
-resource group named `<container-app-name>-rg` where **no new image is built**, but an existing image in ACR named
-`sampleacr.azurecr.io/app:latest` will be deployed to the Container App.
+`mytestacr.azurecr.io/app:latest`
 
 ## Contributing
 
