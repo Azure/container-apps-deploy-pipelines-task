@@ -69,14 +69,14 @@
             "type": "string",
             "label": "Azure Container Registry username",
             "required": false,
-            "helpMarkDown": "The username used to authenticate push requests to the provided Azure Contrainer Registry. If not provided, an access token will be generated via 'az acr login' and provided to 'docker login' to authenticate the requests."
+            "helpMarkDown": "The username used to authenticate push requests to the provided Azure Container Registry. If not provided, an access token will be generated via 'az acr login' and provided to 'docker login' to authenticate the requests."
         },
         {
             "name": "acrPassword",
             "type": "string",
             "label": "Azure Container Registry password",
             "required": false,
-            "helpMarkDown": "The password used to authenticate push requests to the provided Azure Contrainer Registry. If not provided, an access token will be generated via 'az acr login' and provided to 'docker login' to authenticate the requests."
+            "helpMarkDown": "The password used to authenticate push requests to the provided Azure Container Registry. If not provided, an access token will be generated via 'az acr login' and provided to 'docker login' to authenticate the requests."
         },
         {
             "name": "dockerfilePath",
@@ -133,6 +133,13 @@
             "label": "Application target port",
             "required": false,
             "helpMarkDown": "The designated port for the application to run on. If not provided, this value is 80 for Python applications, and 8080 for all other supposed platforms."
+        },
+        {
+            "name": "environmentVariables",
+            "type": "string",
+            "label": "Environment variables",
+            "required": false,
+            "helpMarkDown": "A list of environment variable(s) for the container. Space-separated values in 'key=value' format. Empty string to clear existing values. Prefix value with 'secretref:' to reference a secret."
         }
     ],
     "execution": {
