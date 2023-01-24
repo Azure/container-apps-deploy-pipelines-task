@@ -135,6 +135,13 @@
             "helpMarkDown": "The designated port for the application to run on. If not provided, this value is 80 for Python applications, and 8080 for all other supposed platforms."
         },
         {
+            "name": "location",
+            "type": "string",
+            "label": "Location of the Container App",
+            "required": false,
+            "helpMarkDown": "The location that the Container App (and other created resources) will be deployed to."
+        },
+        {
             "name": "environmentVariables",
             "type": "string",
             "label": "Environment variables",

@@ -141,6 +141,12 @@ export class azurecontainerapps {
                 optionalCmdArgs.push(`--target-port ${targetPort}`);
             }
 
+            // Set Container App deployment location, if provided
+            const location: string = tl.getInput('location', false);
+            if (!!location) {
+                optionalCmdArgs.push(`--location ${location}`);
+            }
+
             // Add user specified environment variables
             const environmentVariables: string = tl.getInput('environmentVariables', false);
             if (!!environmentVariables) {

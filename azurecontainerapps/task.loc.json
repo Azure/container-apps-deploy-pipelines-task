@@ -135,6 +135,13 @@
       "helpMarkDown": "ms-resource:loc.input.help.targetPort"
     },
     {
+      "name": "targetPort",
+      "type": "string",
+      "label": "ms-resource:loc.input.label.location",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.location"
+    },
+    {
       "name": "environmentVariables",
       "type": "string",
       "label": "ms-resource:loc.input.label.environmentVariables",
