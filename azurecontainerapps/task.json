@@ -180,7 +180,8 @@
         "ErrorCodeFormat": "Error Code: [%s]",
         "ErrorMessageFormat": "Error: %s",
         "FoundAppSourceDockerfileMessage": "Found existing Dockerfile in provided application source at path '%s'; image will be built from this Dockerfile.",
-        "InvalidArgumentsMessage": "Either appSourcePath or imageToDeploy must be provided, but not both.",
+        "InvalidArgumentsMessage": "The arguments appSourcePath and acrName must either be provided together or not at all.",
+        "MissingImageToDeployMessage": "The argument imageToDeploy must be provided if neither appSourcePath nor acrName are provided.",
         "PackCliInstallFailed": "Unable to install pack CLI.",
         "PushImageToAcrFailed": "Unable to push image '%s' to ACR.",
         "SetDefaultBuilderFailed": "Unable to set the Oryx++ Builder as the default builder."

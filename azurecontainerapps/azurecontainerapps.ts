@@ -26,16 +26,25 @@ export class azurecontainerapps {
             // Set up array to store optional arguments for the 'az containerapp up' command
             const optionalCmdArgs: string[] = [];
 
-            // Get the path to the application source to build and run
+            // Get the path to the application source to build and run, if provided
             const appSourcePath: string = tl.getInput('appSourcePath', false);
 
-            // Get the previously built image to deploy
+            // Get the name of the ACR instance to push images to, if provided
+            const acrName: string = tl.getInput('acrName', false);
+
+            // Get the previously built image to deploy, if provided
             let imageToDeploy: string = tl.getInput('imageToDeploy', false);
 
-            // Ensure that either the application source or a previously built image is provided, but not both
-            if ((!appSourcePath && !imageToDeploy) || (!!appSourcePath && !!imageToDeploy)) {
+            // Ensure that appSourcePath and acrName are provided together
+            if ((!!appSourcePath && !acrName) || (!appSourcePath && !!acrName)) {
                 tl.error(tl.loc('InvalidArgumentsMessage'));
                 throw Error(tl.loc('InvalidArgumentsMessage'));
+            }
+
+            // Ensure that if neither appSourcePath nor acrName are provided that imageToDeploy is provided
+            if (!appSourcePath && !acrName && !imageToDeploy) {
+                tl.error(tl.loc('MissingImageToDeployMessage'));
+                throw Error(tl.loc('MissingImageToDeployMessage'));
             }
 
             // Install the pack CLI
@@ -48,7 +57,6 @@ export class azurecontainerapps {
             const connectedService: string = tl.getInput('connectedServiceNameARM', true);
             authHelper.loginAzureRM(connectedService);
 
-            const acrName: string = tl.getInput('acrName', true);
             const acrUsername: string = tl.getInput('acrUsername', false);
             const acrPassword: string = tl.getInput('acrPassword', false);
 

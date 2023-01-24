@@ -181,6 +181,7 @@
     "ErrorMessageFormat": "ms-resource:loc.messages.ErrorMessageFormat",
     "FoundAppSourceDockerfileMessage": "ms-resource:loc.messages.FoundAppSourceDockerfileMessage",
     "InvalidArgumentsMessage": "ms-resource:loc.messages.InvalidArgumentsMessage",
+    "MissingImageToDeployMessage": "ms-resource:loc.messages.MissingImageToDeployMessage",
     "PackCliInstallFailed": "ms-resource:loc.messages.PackCliInstallFailed",
     "PushImageToAcrFailed": "ms-resource:loc.messages.PushImageToAcrFailed",
     "SetDefaultBuilderFailed": "ms-resource:loc.messages.SetDefaultBuilderFailed"
