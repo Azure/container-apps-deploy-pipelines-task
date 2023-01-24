@@ -30,7 +30,7 @@ export class ContainerRegistryHelper {
         tl.debug(`Attempting to log in to ACR instance "${acrName}" with access token`);
         try {
             const command: string = `CA_ADO_TASK_ACR_ACCESS_TOKEN=$(az acr login --name ${acrName} --output json --expose-token --only-show-errors | jq -r '.accessToken'); docker login ${acrName}.azurecr.io -u 00000000-0000-0000-0000-000000000000 -p $CA_ADO_TASK_ACR_ACCESS_TOKEN > /dev/null 2>&1`;
-            await new CommandHelper().execBashCommandAsync(command);
+            await new CommandHelper().execCommandAsync(command);
         } catch (err) {
             tl.error(tl.loc('AcrAccessTokenAuthFailed', acrName));
             throw err;

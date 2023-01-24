@@ -57,6 +57,26 @@ This task requires that Docker is installed on the Azure Pipelines agent to push
 Registry. For more information on how to install Docker on the agent, please see
 [this document](https://docs.docker.com/get-docker/).
 
+### pack CLI
+
+The [pack CLI](https://buildpacks.io/docs/tools/pack/) is maintained by the Cloud Native Buildpacks project and is used
+by this task to create runnable application images for the user when the application source code is provided and no
+additional Dockerfile is provided or found. A [builder](https://buildpacks.io/docs/concepts/components/builder/) was
+created by Oryx to take in the application source code provided to this task and produce an image that could then be
+pushed to an image registry and used within a Container App to build and run the application.
+
+A stable version of the pack CLI is installed on the Azure Pipelines agent executing the task, and depending on the base
+OS of this agent, different tools will be leverage to assist with the installation:
+- On Windows runners:
+  - A set of PowerShell commands are executed to do the following:
+    - Creates a `pack` folder in the agent's temporary folder, if the `pack` folder doesn't already exist
+    - Downloads the pack CLI `.zip` into this `pack` folder
+    - Unzips the content from this `.zip` and places them in the `pack` folder
+    - Deletes the `.zip`
+- On non-Windows runners:
+  - `curl` will be used to pull down the `.tgz` containing the `pack` executable
+  - `tar` will be used to unzip the `.tgz` and place the `pack` executable in `/usr/local/bin`
+
 ### Azure Container Registry
 
 An [Azure Container Registry](https://azure.microsoft.com/en-us/products/container-registry/) must exist that the user
