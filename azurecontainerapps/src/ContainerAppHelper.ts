@@ -88,11 +88,20 @@ export class ContainerAppHelper {
             tl.execSync('docker', dockerCommand);
 
             // Read the temp file to get the runtime stack into a variable
-            let command: string = `head -n 1 ${appSourcePath}/oryx-runtime.txt`;
+            const oryxRuntimeTxtPath = path.join(appSourcePath, 'oryx-runtime.txt');
+            let command: string = `head -n 1 ${oryxRuntimeTxtPath}`;
+            if (IS_WINDOWS_AGENT) {
+                command = `Get-Content -Path ${oryxRuntimeTxtPath} -Head 1`;
+            }
+
             const runtimeStack = await new CommandHelper().execCommandAsync(command);
 
             // Delete the temp file
             command = `rm ${appSourcePath}/oryx-runtime.txt`;
+            if (IS_WINDOWS_AGENT) {
+                command = `Remove-Item -Path ${oryxRuntimeTxtPath}`;
+            }
+
             await new CommandHelper().execCommandAsync(command);
 
             return runtimeStack;
@@ -125,13 +134,13 @@ export class ContainerAppHelper {
         try {
             let command: string = '';
             if (IS_WINDOWS_AGENT) {
-                const packZipDownloadUri: string = 'https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-win32.zip';
+                const packZipDownloadUri: string = 'https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-windows.zip';
                 const packZipDownloadFilePath: string = path.join(PACK_CMD, 'pack-windows.zip');
 
                 command = `New-Item -ItemType Directory -Path ${PACK_CMD} -Force | Out-Null;` +
                           `Invoke-WebRequest -Uri ${packZipDownloadUri} -OutFile ${packZipDownloadFilePath}; ` +
                           `Expand-Archive -LiteralPath ${packZipDownloadFilePath} -DestinationPath ${PACK_CMD}; ` +
-                          `Remove-Item -Path ${packZipDownloadFilePath} -Force`;
+                          `Remove-Item -Path ${packZipDownloadFilePath}`;
             } else {
                 const tgzSuffix = AGENT_OS == 'Darwin' ? 'macos' : 'linux';
                 command = `(curl -sSL \"https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-${tgzSuffix}.tgz\" | ` +
