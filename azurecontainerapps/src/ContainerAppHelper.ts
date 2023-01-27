@@ -97,7 +97,7 @@ export class ContainerAppHelper {
             const runtimeStack = await new CommandHelper().execCommandAsync(command);
 
             // Delete the temp file
-            command = `rm ${appSourcePath}/oryx-runtime.txt`;
+            command = `rm ${oryxRuntimeTxtPath}`;
             if (IS_WINDOWS_AGENT) {
                 command = `Remove-Item -Path ${oryxRuntimeTxtPath}`;
             }

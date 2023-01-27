@@ -24,6 +24,8 @@ task is _not_ able to run successfully with the following operating systems:
   Docker installed, but by default, Linux-based images are unable to be pulled down; as a result, this task is not able
   to pull down the Oryx builder to create runnable application images from provided application source.
 
+Please see the below **Docker** prerequisite section for more information.
+
 ## Description
 
 This Azure Pipelines Task allows users to easily deploy their application source to an
@@ -81,6 +83,14 @@ located the `DockerCli.exe` file on your agent (typically in the `Program Files\
 ```
 & `.\DockerCli.exe` -SwitchDaemon
 ```
+
+If Docker is not installed on the agent running this task, the following scenario(s) are still enabled:
+- Providing a _previously built_ image to the `imageToDeploy` argument that the Container App deploys with
+
+If Docker is on the agent, but unable to work with Linux-based images, the following scenario(s) are still enabled:
+- Providing a _previously built_ image to the `imageToDeploy` argument that the Container App deploys with
+- Providing a `Dockerfile` as a part of your application source that will be built and deployed with the Container App
+  - _Note_: the `Dockerfile` cannot have any Linux-based image layers
 
 ### pack CLI
 
