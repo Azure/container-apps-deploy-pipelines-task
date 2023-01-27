@@ -8,6 +8,22 @@ The `AzureContainerAppsRC` task found in this repository is the _Release Candida
 of this Release Candidate task is to offer users immediate early access to features, bug fixes and patches that will
 eventually be rolled out in the official `AzureContainerApps` task at the end of every three week sprint.
 
+## Running this task on Microsoft-hosted agents
+
+If you are running this task on a
+[Microsoft-hosted agent](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted), you may find that this
+task is _not_ able to run successfully with the following operating systems:
+
+- macOS
+  - The [macOS runners](https://github.com/actions/runner-images#available-images) provided by Microsoft do not come
+  installed with Docker (more information [here](https://github.com/actions/runner-images/issues/17#issuecomment-614726536));
+  as a result, this task is not able to run any `docker` commands, such as pushing the built runnable application images
+  to ACR.
+- Windows
+  - The [Windows runners](https://github.com/actions/runner-images#available-images) provided by Microsoft comes with
+  Docker installed, but by default, Linux-based images are unable to be pulled down; as a result, this task is not able
+  to pull down the Oryx builder to create runnable application images from provided application source.
+
 ## Description
 
 This Azure Pipelines Task allows users to easily deploy their application source to an
@@ -56,6 +72,15 @@ variables are updated.
 This task requires that Docker is installed on the Azure Pipelines agent to push images to the provided Azure Container
 Registry. For more information on how to install Docker on the agent, please see
 [this document](https://docs.docker.com/get-docker/).
+
+In addition, users running this task with a Windows agent may encounter an issue with not being able to pull down
+Linux-based images; to resolve this, please visit
+[this site](https://docs.docker.com/desktop/faqs/windowsfaqs/#how-do-i-switch-between-windows-and-linux-containers) or
+located the `DockerCli.exe` file on your agent (typically in the `Program Files\Docker\Docker` folder) and run
+
+```
+& `.\DockerCli.exe` -SwitchDaemon
+```
 
 ### pack CLI
 

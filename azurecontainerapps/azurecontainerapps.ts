@@ -78,14 +78,39 @@ export class azurecontainerapps {
                 await new ContainerRegistryHelper().loginAcrWithAccessTokenAsync(acrName);
             }
 
+            // Signals whether the Oryx builder should be used to create a runnable application image
+            let shouldUseBuilder: boolean = false;
+
+            // Signals whether an image will be created locally and pushed to ACR to use for the Container App
+            let shouldBuildAndPushImage = !util.isNullOrEmpty(appSourcePath);
+
             // Get Dockerfile to build, if provided, or check if one exists at the root of the provided application
             let dockerfilePath: string = tl.getInput('dockerfilePath', false);
+            if (shouldBuildAndPushImage) {
+                if (util.isNullOrEmpty(dockerfilePath)) {
+                    console.log(tl.loc('CheckForAppSourceDockerfileMessage', appSourcePath));
+                    const rootDockerfilePath = path.join(appSourcePath, 'Dockerfile');
+                    if (fs.existsSync(rootDockerfilePath)) {
+                        console.log(tl.loc('FoundAppSourceDockerfileMessage', rootDockerfilePath));
+                        dockerfilePath = rootDockerfilePath;
+                    } else {
+                        // No Dockerfile found or provided, use the builder
+                        shouldUseBuilder = true;
+                    }
+                } else {
+                    dockerfilePath = path.join(appSourcePath, dockerfilePath);
+                }
+            }
+
             if (!util.isNullOrEmpty(appSourcePath) && util.isNullOrEmpty(dockerfilePath)) {
                 console.log(tl.loc('CheckForAppSourceDockerfileMessage', appSourcePath));
                 const rootDockerfilePath = path.join(appSourcePath, 'Dockerfile');
                 if (fs.existsSync(rootDockerfilePath)) {
                     console.log(tl.loc('FoundAppSourceDockerfileMessage', rootDockerfilePath));
                     dockerfilePath = rootDockerfilePath;
+                } else {
+                    // No Dockerfile found or provided, use the builder
+                    shouldUseBuilder = true;
                 }
             } else if (!util.isNullOrEmpty(appSourcePath) && !util.isNullOrEmpty(dockerfilePath)) {
                 dockerfilePath = path.join(appSourcePath, dockerfilePath);
@@ -99,10 +124,8 @@ export class azurecontainerapps {
             }
 
             // Get the name of the image to deploy if it was provided, or set it to the value of 'imageToBuild'
-            let shouldBuildAndPushImage = false;
             if (util.isNullOrEmpty(imageToDeploy)) {
                 imageToDeploy = imageToBuild;
-                shouldBuildAndPushImage = true;
                 console.log(tl.loc('DefaultImageToDeployMessage', imageToDeploy));
             }
 
@@ -129,14 +152,14 @@ export class azurecontainerapps {
 
             // Get the runtime stack if provided, or determine it using Oryx
             let runtimeStack: string = tl.getInput('runtimeStack', false);
-            if (util.isNullOrEmpty(runtimeStack) && shouldBuildAndPushImage) {
+            if (util.isNullOrEmpty(runtimeStack) && shouldUseBuilder) {
                 runtimeStack = await new ContainerAppHelper().determineRuntimeStackAsync(appSourcePath);
                 console.log(tl.loc('DefaultRuntimeStackMessage', runtimeStack));
             }
 
             // Get the target port if provided, or determine it based on the application type
             let targetPort: string = tl.getInput('targetPort', false);
-            if (util.isNullOrEmpty(targetPort) && util.isNullOrEmpty(dockerfilePath)) {
+            if (util.isNullOrEmpty(targetPort) && shouldUseBuilder) {
                 if (!util.isNullOrEmpty(runtimeStack) && runtimeStack.startsWith('python:')) {
                     targetPort = '80';
                 } else {
@@ -164,7 +187,7 @@ export class azurecontainerapps {
             }
 
             // If using the Oryx++ Builder to produce an image, create a runnable application image
-            if (util.isNullOrEmpty(dockerfilePath) && shouldBuildAndPushImage) {
+            if (shouldUseBuilder) {
                 console.log(tl.loc('CreateImageWithBuilderMessage'));
 
                 // Set the Oryx++ Builder as the default builder locally
