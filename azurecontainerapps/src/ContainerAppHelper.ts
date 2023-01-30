@@ -1,8 +1,13 @@
 import * as tl from 'azure-pipelines-task-lib/task';
+import * as path from 'path';
+import * as os from 'os';
 import { CommandHelper } from './CommandHelper';
 
 const ORYX_CLI_IMAGE: string = 'mcr.microsoft.com/oryx/cli:builder-debian-buster-20230118.1';
 const ORYX_BUILDER_IMAGE: string = 'mcr.microsoft.com/oryx/builder:20230118.1';
+const AGENT_OS: string = tl.getVariable('AGENT.OS');
+const IS_WINDOWS_AGENT: boolean = AGENT_OS == 'Windows_NT';
+const PACK_CMD: string = IS_WINDOWS_AGENT ? path.join(os.tmpdir(), 'pack') : 'pack';
 
 export class ContainerAppHelper {
     /**
@@ -43,7 +48,7 @@ export class ContainerAppHelper {
         runtimeStack: string) {
             tl.debug(`Attempting to create a runnable application image using the Oryx++ Builder with image name "${imageToDeploy}"`);
             try {
-                tl.execSync('pack', `build ${imageToDeploy} --path ${appSourcePath} --builder ${ORYX_BUILDER_IMAGE} --run-image mcr.microsoft.com/oryx/${runtimeStack} --env "CALLER_ID=azure-pipelines-v0"`);
+                tl.execSync(PACK_CMD, `build ${imageToDeploy} --path ${appSourcePath} --builder ${ORYX_BUILDER_IMAGE} --run-image mcr.microsoft.com/oryx/${runtimeStack} --env "CALLER_ID=azure-pipelines-v0"`);
             } catch (err) {
                 tl.error(tl.loc('CreateImageWithBuilderFailed'));
                 throw err;
@@ -83,12 +88,21 @@ export class ContainerAppHelper {
             tl.execSync('docker', dockerCommand);
 
             // Read the temp file to get the runtime stack into a variable
-            let command: string = `head -n 1 ${appSourcePath}/oryx-runtime.txt`;
-            const runtimeStack = await new CommandHelper().execBashCommandAsync(command);
+            const oryxRuntimeTxtPath = path.join(appSourcePath, 'oryx-runtime.txt');
+            let command: string = `head -n 1 ${oryxRuntimeTxtPath}`;
+            if (IS_WINDOWS_AGENT) {
+                command = `Get-Content -Path ${oryxRuntimeTxtPath} -Head 1`;
+            }
+
+            const runtimeStack = await new CommandHelper().execCommandAsync(command);
 
             // Delete the temp file
-            command = `rm ${appSourcePath}/oryx-runtime.txt`;
-            await new CommandHelper().execBashCommandAsync(command);
+            command = `rm ${oryxRuntimeTxtPath}`;
+            if (IS_WINDOWS_AGENT) {
+                command = `Remove-Item -Path ${oryxRuntimeTxtPath}`;
+            }
+
+            await new CommandHelper().execCommandAsync(command);
 
             return runtimeStack;
         } catch (err) {
@@ -104,7 +118,7 @@ export class ContainerAppHelper {
      public setDefaultBuilder() {
         tl.debug('Setting the Oryx++ Builder as the default builder via the pack CLI');
         try {
-            tl.execSync('pack', `config default-builder ${ORYX_BUILDER_IMAGE}`);
+            tl.execSync(PACK_CMD, `config default-builder ${ORYX_BUILDER_IMAGE}`);
         } catch (err) {
             tl.error(tl.loc('SetDefaultBuilderFailed'));
             throw err;
@@ -118,9 +132,22 @@ export class ContainerAppHelper {
      public async installPackCliAsync() {
         tl.debug('Attempting to install the pack CLI');
         try {
-            const command: string = '(curl -sSL \"https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-linux.tgz\" | ' +
+            let command: string = '';
+            if (IS_WINDOWS_AGENT) {
+                const packZipDownloadUri: string = 'https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-windows.zip';
+                const packZipDownloadFilePath: string = path.join(PACK_CMD, 'pack-windows.zip');
+
+                command = `New-Item -ItemType Directory -Path ${PACK_CMD} -Force | Out-Null;` +
+                          `Invoke-WebRequest -Uri ${packZipDownloadUri} -OutFile ${packZipDownloadFilePath}; ` +
+                          `Expand-Archive -LiteralPath ${packZipDownloadFilePath} -DestinationPath ${PACK_CMD}; ` +
+                          `Remove-Item -Path ${packZipDownloadFilePath}`;
+            } else {
+                const tgzSuffix = AGENT_OS == 'Darwin' ? 'macos' : 'linux';
+                command = `(curl -sSL \"https://github.com/buildpacks/pack/releases/download/v0.27.0/pack-v0.27.0-${tgzSuffix}.tgz\" | ` +
                                   'tar -C /usr/local/bin/ --no-same-owner -xzv pack)';
-            await new CommandHelper().execBashCommandAsync(command);
+            }
+
+            await new CommandHelper().execCommandAsync(command);
         } catch (err) {
             tl.error(tl.loc('PackCliInstallFailed'));
             throw err;

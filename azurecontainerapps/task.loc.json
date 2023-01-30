@@ -19,7 +19,7 @@
   "version": {
     "Major": 0,
     "Minor": 1,
-    "Patch": 7
+    "Patch": 8
   },
   "minimumAgentVersion": "2.144.0",
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
@@ -61,7 +61,7 @@
       "name": "acrName",
       "type": "string",
       "label": "ms-resource:loc.input.label.acrName",
-      "required": true,
+      "required": false,
       "helpMarkDown": "ms-resource:loc.input.help.acrName"
     },
     {
@@ -133,6 +133,20 @@
       "label": "ms-resource:loc.input.label.targetPort",
       "required": false,
       "helpMarkDown": "ms-resource:loc.input.help.targetPort"
+    },
+    {
+      "name": "targetPort",
+      "type": "string",
+      "label": "ms-resource:loc.input.label.location",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.location"
+    },
+    {
+      "name": "environmentVariables",
+      "type": "string",
+      "label": "ms-resource:loc.input.label.environmentVariables",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.environmentVariables"
     }
   ],
   "execution": {
@@ -167,6 +181,7 @@
     "ErrorMessageFormat": "ms-resource:loc.messages.ErrorMessageFormat",
     "FoundAppSourceDockerfileMessage": "ms-resource:loc.messages.FoundAppSourceDockerfileMessage",
     "InvalidArgumentsMessage": "ms-resource:loc.messages.InvalidArgumentsMessage",
+    "MissingImageToDeployMessage": "ms-resource:loc.messages.MissingImageToDeployMessage",
     "PackCliInstallFailed": "ms-resource:loc.messages.PackCliInstallFailed",
     "PushImageToAcrFailed": "ms-resource:loc.messages.PushImageToAcrFailed",
     "SetDefaultBuilderFailed": "ms-resource:loc.messages.SetDefaultBuilderFailed"
