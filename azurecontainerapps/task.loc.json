@@ -19,7 +19,7 @@
   "version": {
     "Major": 0,
     "Minor": 1,
-    "Patch": 8
+    "Patch": 9
   },
   "minimumAgentVersion": "2.144.0",
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
@@ -135,7 +135,7 @@
       "helpMarkDown": "ms-resource:loc.input.help.targetPort"
     },
     {
-      "name": "targetPort",
+      "name": "location",
       "type": "string",
       "label": "ms-resource:loc.input.label.location",
       "required": false,
@@ -180,7 +180,7 @@
     "ErrorCodeFormat": "ms-resource:loc.messages.ErrorCodeFormat",
     "ErrorMessageFormat": "ms-resource:loc.messages.ErrorMessageFormat",
     "FoundAppSourceDockerfileMessage": "ms-resource:loc.messages.FoundAppSourceDockerfileMessage",
-    "InvalidArgumentsMessage": "ms-resource:loc.messages.InvalidArgumentsMessage",
+    "MissingAcrNameMessage": "ms-resource:loc.messages.MissingAcrNameMessage",
     "MissingImageToDeployMessage": "ms-resource:loc.messages.MissingImageToDeployMessage",
     "PackCliInstallFailed": "ms-resource:loc.messages.PackCliInstallFailed",
     "PushImageToAcrFailed": "ms-resource:loc.messages.PushImageToAcrFailed",

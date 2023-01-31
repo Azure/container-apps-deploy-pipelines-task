@@ -6,7 +6,7 @@
     "description": "An Azure DevOps Task to build and deploy Azure Container Apps.",
     "author": "Microsoft Corporation",
     "helpMarkDown": "[Learn more about this task](http://github.com/Azure/container-apps-deploy-pipelines-task)",
-    "releaseNotes": "Released new AzureContainerAppsRC task for building and deploying Azure Container Apps.",
+    "releaseNotes": "Fixed incorrect argument validation bug that prevented acrName being provided without appSourcePath.",
     "category": "Deploy",
     "visibility": [
         "Build",
@@ -19,7 +19,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 8
+        "Patch": 9
     },
     "minimumAgentVersion": "2.144.0",
     "instanceNameFormat": "Azure Container Apps Deploy (Release Candidate)",
@@ -180,7 +180,7 @@
         "ErrorCodeFormat": "Error Code: [%s]",
         "ErrorMessageFormat": "Error: %s",
         "FoundAppSourceDockerfileMessage": "Found existing Dockerfile in provided application source at path '%s'; image will be built from this Dockerfile.",
-        "InvalidArgumentsMessage": "The arguments appSourcePath and acrName must either be provided together or not at all.",
+        "MissingAcrNameMessage": "The acrName argument must also be provided if the appSourcePath argument is provided.",
         "MissingImageToDeployMessage": "The argument imageToDeploy must be provided if neither appSourcePath nor acrName are provided.",
         "PackCliInstallFailed": "Unable to install pack CLI.",
         "PushImageToAcrFailed": "Unable to push image '%s' to ACR.",

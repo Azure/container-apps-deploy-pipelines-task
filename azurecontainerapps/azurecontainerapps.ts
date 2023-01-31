@@ -37,10 +37,10 @@ export class azurecontainerapps {
             // Get the previously built image to deploy, if provided
             let imageToDeploy: string = tl.getInput('imageToDeploy', false);
 
-            // Ensure that appSourcePath and acrName are either provided together or not at all
-            if (util.isNullOrEmpty(appSourcePath) != util.isNullOrEmpty(acrName)) {
-                tl.error(tl.loc('InvalidArgumentsMessage'));
-                throw Error(tl.loc('InvalidArgumentsMessage'));
+            // Ensure that acrName is also provided if appSourcePath is provided
+            if (!util.isNullOrEmpty(appSourcePath) && util.isNullOrEmpty(acrName)) {
+                tl.error(tl.loc('MissingAcrNameMessage'));
+                throw Error(tl.loc('MissingAcrNameMessage'));
             }
 
             // Ensure that if neither appSourcePath nor acrName are provided that imageToDeploy is provided
