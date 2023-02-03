@@ -2,6 +2,7 @@ import * as tl from 'azure-pipelines-task-lib/task';
 import * as path from 'path';
 import * as os from 'os';
 import { CommandHelper } from './CommandHelper';
+import { Utility } from './Utility';
 
 const ORYX_CLI_IMAGE: string = 'mcr.microsoft.com/oryx/cli:builder-debian-buster-20230118.1';
 const ORYX_BUILDER_IMAGE: string = 'mcr.microsoft.com/oryx/builder:20230118.1';
@@ -29,7 +30,9 @@ export class ContainerAppHelper {
                     command += ` ${val}`;
                 });
 
-                tl.execSync('az', command);
+                new Utility().throwIfError(
+                    tl.execSync('az', command)
+                );
             } catch (err) {
                 tl.error(tl.loc('CreateOrUpdateContainerAppFailed'));
                 throw err;
@@ -48,7 +51,9 @@ export class ContainerAppHelper {
         runtimeStack: string) {
             tl.debug(`Attempting to create a runnable application image using the Oryx++ Builder with image name "${imageToDeploy}"`);
             try {
-                tl.execSync(PACK_CMD, `build ${imageToDeploy} --path ${appSourcePath} --builder ${ORYX_BUILDER_IMAGE} --run-image mcr.microsoft.com/oryx/${runtimeStack} --env "CALLER_ID=azure-pipelines-v0"`);
+                new Utility().throwIfError(
+                    tl.execSync(PACK_CMD, `build ${imageToDeploy} --path ${appSourcePath} --builder ${ORYX_BUILDER_IMAGE} --run-image mcr.microsoft.com/oryx/${runtimeStack} --env "CALLER_ID=azure-pipelines-v0"`)
+                );
             } catch (err) {
                 tl.error(tl.loc('CreateImageWithBuilderFailed'));
                 throw err;
@@ -68,7 +73,9 @@ export class ContainerAppHelper {
         dockerfilePath: string) {
             tl.debug(`Attempting to create a runnable application image from the provided/found Dockerfile "${dockerfilePath}" with image name "${imageToDeploy}"`);
             try {
-                tl.execSync('docker', `build --tag ${imageToDeploy} --file ${dockerfilePath} ${appSourcePath}`);
+                new Utility().throwIfError(
+                    tl.execSync('docker', `build --tag ${imageToDeploy} --file ${dockerfilePath} ${appSourcePath}`)
+                );
             } catch (err) {
                 tl.error(tl.loc('CreateImageWithDockerfileFailed'));
                 throw err;
@@ -85,7 +92,9 @@ export class ContainerAppHelper {
         try {
             // Use 'oryx dockerfile' command to determine the runtime stack to use and write it to a temp file
             const dockerCommand: string = `run --rm -v ${appSourcePath}:/app ${ORYX_CLI_IMAGE} /bin/bash -c "oryx dockerfile /app | head -n 1 | sed 's/ARG RUNTIME=//' >> /app/oryx-runtime.txt"`;
-            tl.execSync('docker', dockerCommand);
+            new Utility().throwIfError(
+                tl.execSync('docker', dockerCommand)
+            );
 
             // Read the temp file to get the runtime stack into a variable
             const oryxRuntimeTxtPath = path.join(appSourcePath, 'oryx-runtime.txt');
@@ -118,7 +127,9 @@ export class ContainerAppHelper {
      public setDefaultBuilder() {
         tl.debug('Setting the Oryx++ Builder as the default builder via the pack CLI');
         try {
-            tl.execSync(PACK_CMD, `config default-builder ${ORYX_BUILDER_IMAGE}`);
+            new Utility().throwIfError(
+                tl.execSync(PACK_CMD, `config default-builder ${ORYX_BUILDER_IMAGE}`)
+            );
         } catch (err) {
             tl.error(tl.loc('SetDefaultBuilderFailed'));
             throw err;
