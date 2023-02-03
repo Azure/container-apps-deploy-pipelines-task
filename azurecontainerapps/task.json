@@ -6,7 +6,7 @@
     "description": "An Azure DevOps Task to build and deploy Azure Container Apps.",
     "author": "Microsoft Corporation",
     "helpMarkDown": "[Learn more about this task](http://github.com/Azure/container-apps-deploy-pipelines-task)",
-    "releaseNotes": "Fixed incorrect argument validation bug that prevented acrName being provided without appSourcePath.",
+    "releaseNotes": "Fixed failing Dockerfile scenarios, added error handling for miscellaneous calls.",
     "category": "Deploy",
     "visibility": [
         "Build",
@@ -19,7 +19,7 @@
     "version": {
         "Major": 0,
         "Minor": 1,
-        "Patch": 9
+        "Patch": 10
     },
     "minimumAgentVersion": "2.144.0",
     "instanceNameFormat": "Azure Container Apps Deploy (Release Candidate)",

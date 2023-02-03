@@ -1,6 +1,7 @@
 import * as tl from 'azure-pipelines-task-lib/task';
 import * as child from 'child_process';
 import { CommandHelper } from './CommandHelper';
+import { Utility } from './Utility';
 
 export class ContainerRegistryHelper {
     /**
@@ -44,7 +45,9 @@ export class ContainerRegistryHelper {
      public pushImageToAcr(imageToPush: string) {
         tl.debug(`Attempting to push image "${imageToPush}" to ACR`);
         try {
-            tl.execSync('docker', `push ${imageToPush}`);
+            new Utility().throwIfError(
+                tl.execSync('docker', `push ${imageToPush}`)
+            );
         } catch (err) {
             tl.error(tl.loc('PushImageToAcrFailed', imageToPush));
             throw err;

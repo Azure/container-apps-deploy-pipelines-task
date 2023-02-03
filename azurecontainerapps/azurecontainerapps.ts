@@ -102,20 +102,6 @@ export class azurecontainerapps {
                 }
             }
 
-            if (!util.isNullOrEmpty(appSourcePath) && util.isNullOrEmpty(dockerfilePath)) {
-                console.log(tl.loc('CheckForAppSourceDockerfileMessage', appSourcePath));
-                const rootDockerfilePath = path.join(appSourcePath, 'Dockerfile');
-                if (fs.existsSync(rootDockerfilePath)) {
-                    console.log(tl.loc('FoundAppSourceDockerfileMessage', rootDockerfilePath));
-                    dockerfilePath = rootDockerfilePath;
-                } else {
-                    // No Dockerfile found or provided, use the builder
-                    shouldUseBuilder = true;
-                }
-            } else if (!util.isNullOrEmpty(appSourcePath) && !util.isNullOrEmpty(dockerfilePath)) {
-                dockerfilePath = path.join(appSourcePath, dockerfilePath);
-            }
-
             // Get the name of the image to build if it was provided, or generate it from build variables
             let imageToBuild: string = tl.getInput('imageToBuild', false);
             if (util.isNullOrEmpty(imageToBuild)) {
