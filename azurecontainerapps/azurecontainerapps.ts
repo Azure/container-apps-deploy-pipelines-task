@@ -49,11 +49,6 @@ export class azurecontainerapps {
                 throw Error(tl.loc('MissingImageToDeployMessage'));
             }
 
-            // Install the pack CLI
-            await new ContainerAppHelper().installPackCliAsync();
-
-            // Set the Azure CLI to dynamically install missing extensions
-            util.setAzureCliDynamicInstall();
 
             // Log in to Azure with the service connection provided
             const connectedService: string = tl.getInput('connectedServiceNameARM', true);
@@ -71,6 +66,52 @@ export class azurecontainerapps {
                     `--registry-username ${acrUsername}`,
                     `--registry-password ${acrPassword}`);
             }
+
+            // Get the Container App environment if provided
+            const containerAppEnvironment: string = tl.getInput('containerAppEnvironment', false);
+            if (!!containerAppEnvironment) {
+                console.log(tl.loc('ContainerAppEnvironmentUsedMessage', containerAppEnvironment));
+                optionalCmdArgs.push(`--environment ${containerAppEnvironment}`);
+            }
+
+            // Get the Container App name if it was provided, or generate it from build variables
+            let containerAppName: string = tl.getInput('containerAppName', false);
+            if (!containerAppName) {
+                containerAppName = `ado-task-app-${buildId}-${buildNumber}`;
+                console.log(tl.loc('DefaultContainerAppNameMessage', containerAppName));
+            }
+
+            // Get the resource group to deploy to if it was provided, or generate it from the Container App name
+            let resourceGroup: string = tl.getInput('resourceGroup', false);
+            if (!resourceGroup) {
+                resourceGroup = `${containerAppName}-rg`;
+                console.log(tl.loc('DefaultResourceGroupMessage', resourceGroup));
+            }
+
+            // Set Container App deployment location, if provided
+            const location: string = tl.getInput('location', false);
+            if (!util.isNullOrEmpty(location)) {
+                optionalCmdArgs.push(`--location ${location}`);
+            }
+
+            // Add user specified environment variables
+            const environmentVariables: string = tl.getInput('environmentVariables', false);
+            if (!util.isNullOrEmpty(environmentVariables)) {
+                optionalCmdArgs.push(`--env-vars ${environmentVariables}`);
+            }
+
+            // Set the Azure CLI to dynamically install missing extensions
+            util.setAzureCliDynamicInstall();
+
+            if (imageToDeploy) {
+                // Create or update Azure Container App
+                new ContainerAppHelper().createOrUpdateContainerApp(containerAppName, resourceGroup, imageToDeploy, optionalCmdArgs);
+
+                return;
+            }
+
+            // Install the pack CLI
+            await new ContainerAppHelper().installPackCliAsync();
 
             // Login to ACR with access token if no credentials were provided
             if (util.isNullOrEmpty(acrUsername) || util.isNullOrEmpty(acrPassword)) {
@@ -115,27 +156,6 @@ export class azurecontainerapps {
                 console.log(tl.loc('DefaultImageToDeployMessage', imageToDeploy));
             }
 
-            // Get the Container App name if it was provided, or generate it from build variables
-            let containerAppName: string = tl.getInput('containerAppName', false);
-            if (util.isNullOrEmpty(containerAppName)) {
-                containerAppName = `ado-task-app-${buildId}-${buildNumber}`;
-                console.log(tl.loc('DefaultContainerAppNameMessage', containerAppName));
-            }
-
-            // Get the resource group to deploy to if it was provided, or generate it from the Container App name
-            let resourceGroup: string = tl.getInput('resourceGroup', false);
-            if (util.isNullOrEmpty(resourceGroup)) {
-                resourceGroup = `${containerAppName}-rg`;
-                console.log(tl.loc('DefaultResourceGroupMessage', resourceGroup));
-            }
-
-            // Get the Container App environment if provided
-            const containerAppEnvironment: string = tl.getInput('containerAppEnvironment', false);
-            if (!util.isNullOrEmpty(containerAppEnvironment)) {
-                console.log(tl.loc('ContainerAppEnvironmentUsedMessage', containerAppEnvironment));
-                optionalCmdArgs.push(`--environment ${containerAppEnvironment}`);
-            }
-
             // Get the runtime stack if provided, or determine it using Oryx
             let runtimeStack: string = tl.getInput('runtimeStack', false);
             if (util.isNullOrEmpty(runtimeStack) && shouldUseBuilder) {
@@ -158,18 +178,6 @@ export class azurecontainerapps {
             // Add the target port to the optional arguments array
             if (!util.isNullOrEmpty(targetPort)) {
                 optionalCmdArgs.push(`--target-port ${targetPort}`);
-            }
-
-            // Set Container App deployment location, if provided
-            const location: string = tl.getInput('location', false);
-            if (!util.isNullOrEmpty(location)) {
-                optionalCmdArgs.push(`--location ${location}`);
-            }
-
-            // Add user specified environment variables
-            const environmentVariables: string = tl.getInput('environmentVariables', false);
-            if (!util.isNullOrEmpty(environmentVariables)) {
-                optionalCmdArgs.push(`--env-vars ${environmentVariables}`);
             }
 
             // If using the Oryx++ Builder to produce an image, create a runnable application image
