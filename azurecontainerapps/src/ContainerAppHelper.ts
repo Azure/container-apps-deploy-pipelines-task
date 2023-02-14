@@ -4,13 +4,19 @@ import * as os from 'os';
 import { CommandHelper } from './CommandHelper';
 import { Utility } from './Utility';
 
-const ORYX_CLI_IMAGE: string = 'mcr.microsoft.com/oryx/cli:builder-debian-buster-20230118.1';
-const ORYX_BUILDER_IMAGE: string = 'mcr.microsoft.com/oryx/builder:20230118.1';
+const ORYX_CLI_IMAGE: string = 'mcr.microsoft.com/oryx/cli:builder-debian-buster-20230208.1';
+const ORYX_BUILDER_IMAGE: string = 'mcr.microsoft.com/oryx/builder:20230208.1';
 const AGENT_OS: string = tl.getVariable('AGENT.OS');
 const IS_WINDOWS_AGENT: boolean = AGENT_OS == 'Windows_NT';
 const PACK_CMD: string = IS_WINDOWS_AGENT ? path.join(os.tmpdir(), 'pack') : 'pack';
 
 export class ContainerAppHelper {
+    readonly disableTelemetry: boolean = false;
+
+    constructor(disableTelemetry: boolean) {
+        this.disableTelemetry = disableTelemetry;
+    }
+
     /**
      * Creates or updates an Azure Container App based from an image that was previously built.
      * @param containerAppName - the name of the Container App
@@ -51,8 +57,13 @@ export class ContainerAppHelper {
         runtimeStack: string) {
             tl.debug(`Attempting to create a runnable application image using the Oryx++ Builder with image name "${imageToDeploy}"`);
             try {
+                let telemetryArg = `--env "CALLER_ID=azure-pipelines-rc-v0"`;
+                if (this.disableTelemetry) {
+                    telemetryArg = `--env "ORYX_DISABLE_TELEMETRY=true"`;
+                }
+
                 new Utility().throwIfError(
-                    tl.execSync(PACK_CMD, `build ${imageToDeploy} --path ${appSourcePath} --builder ${ORYX_BUILDER_IMAGE} --run-image mcr.microsoft.com/oryx/${runtimeStack} --env "CALLER_ID=azure-pipelines-v0"`)
+                    tl.execSync(PACK_CMD, `build ${imageToDeploy} --path ${appSourcePath} --builder ${ORYX_BUILDER_IMAGE} --run-image mcr.microsoft.com/oryx/${runtimeStack} ${telemetryArg}`)
                 );
             } catch (err) {
                 tl.error(tl.loc('CreateImageWithBuilderFailed'));

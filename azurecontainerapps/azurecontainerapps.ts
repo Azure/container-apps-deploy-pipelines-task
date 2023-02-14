@@ -1,18 +1,31 @@
+import * as fs from 'fs';
 import * as path from 'path';
 import * as tl from 'azure-pipelines-task-lib/task';
-import * as fs from 'fs';
-import { Utility } from './src/Utility';
-import { ContainerAppHelper } from './src/ContainerAppHelper';
 import { AzureAuthenticationHelper } from './src/AzureAuthenticationHelper';
+import { ContainerAppHelper } from './src/ContainerAppHelper';
 import { ContainerRegistryHelper } from './src/ContainerRegistryHelper';
+import { TelemetryHelper } from './src/TelemetryHelper';
+import { Utility } from './src/Utility';
 
 const util = new Utility();
 
 export class azurecontainerapps {
 
     public static async runMain(): Promise<void> {
+        let disableTelemetry = false;
+        try {
+            disableTelemetry = tl.getBoolInput('disableTelemetry', false);
+        }
+        finally {}
+
+        // Set up TelemetryHelper for managing telemetry calls
+        const telemetryHelper: TelemetryHelper = new TelemetryHelper(disableTelemetry);
+
         // Set up AzureAuthenticationHelper for managing logging in and out of Azure CLI using provided service connection
         const authHelper: AzureAuthenticationHelper = new AzureAuthenticationHelper();
+
+        // Set up ContainerAppHelper for managing calls around the Container App
+        const appHelper: ContainerAppHelper = new ContainerAppHelper(disableTelemetry);
         try {
             // Set up localization
             tl.setResourcePath(path.join(__dirname, 'task.json'));
@@ -50,7 +63,7 @@ export class azurecontainerapps {
             }
 
             // Install the pack CLI
-            await new ContainerAppHelper().installPackCliAsync();
+            await appHelper.installPackCliAsync();
 
             // Set the Azure CLI to dynamically install missing extensions
             util.setAzureCliDynamicInstall();
@@ -139,7 +152,7 @@ export class azurecontainerapps {
             // Get the runtime stack if provided, or determine it using Oryx
             let runtimeStack: string = tl.getInput('runtimeStack', false);
             if (util.isNullOrEmpty(runtimeStack) && shouldUseBuilder) {
-                runtimeStack = await new ContainerAppHelper().determineRuntimeStackAsync(appSourcePath);
+                runtimeStack = await appHelper.determineRuntimeStackAsync(appSourcePath);
                 console.log(tl.loc('DefaultRuntimeStackMessage', runtimeStack));
             }
 
@@ -177,30 +190,43 @@ export class azurecontainerapps {
                 console.log(tl.loc('CreateImageWithBuilderMessage'));
 
                 // Set the Oryx++ Builder as the default builder locally
-                new ContainerAppHelper().setDefaultBuilder();
+                appHelper.setDefaultBuilder();
 
                 // Create a runnable application image
-                new ContainerAppHelper().createRunnableAppImage(imageToDeploy, appSourcePath, runtimeStack);
+                appHelper.createRunnableAppImage(imageToDeploy, appSourcePath, runtimeStack);
+
+                // If telemetry is enabled, log that the builder scenario was targeted for this task
+                telemetryHelper.setBuilderScenario();
             }
 
             // If a Dockerfile was found or provided, create a runnable application image from that
             if (!util.isNullOrEmpty(dockerfilePath) && shouldBuildAndPushImage) {
                 console.log(tl.loc('CreateImageWithDockerfileMessage', dockerfilePath));
-                new ContainerAppHelper().createRunnableAppImageFromDockerfile(imageToDeploy, appSourcePath, dockerfilePath);
+                appHelper.createRunnableAppImageFromDockerfile(imageToDeploy, appSourcePath, dockerfilePath);
+
+                // If telemetry is enabled, log that the Dockerfile scenario was targeted for this task
+                telemetryHelper.setDockerfileScenario();
             }
 
             // Push image to Azure Container Registry
             if (shouldBuildAndPushImage) {
                 new ContainerRegistryHelper().pushImageToAcr(imageToDeploy);
+            } else {
+                // If telemetry is enabled, log that the previously built image scenario was targeted for this task
+                telemetryHelper.setImageScenario();
             }
 
             // Create or update Azure Container App
-            new ContainerAppHelper().createOrUpdateContainerApp(containerAppName, resourceGroup, imageToDeploy, optionalCmdArgs);
+            appHelper.createOrUpdateContainerApp(containerAppName, resourceGroup, imageToDeploy, optionalCmdArgs);
+            telemetryHelper.setSuccessfulResult();
         } catch (err) {
             tl.setResult(tl.TaskResult.Failed, err.message);
         } finally {
             // Logout of Azure if logged in during this task session
             authHelper.logoutAzure();
+
+            // Log telemetry for this task run (will do nothing if telemetry was previously disabled)
+            telemetryHelper.log();
         }
     }
 }

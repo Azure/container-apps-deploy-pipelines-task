@@ -147,6 +147,13 @@
             "label": "Environment variables",
             "required": false,
             "helpMarkDown": "A list of environment variable(s) for the container. Space-separated values in 'key=value' format. Empty string to clear existing values. Prefix value with 'secretref:' to reference a secret."
+        },
+        {
+            "name": "disableTelemetry",
+            "type": "boolean",
+            "label": "Disable telemetry",
+            "required": false,
+            "helpMarkDown": "If set to 'true', no telemetry will be collected by this Azure DevOps Task. If set to 'false', or if this argument is not provided, telemetry will be sent to Microsoft about the Container App build and deploy scenario targeted by this Azure DevOps Task."
         }
     ],
     "execution": {
@@ -180,6 +187,7 @@
         "ErrorCodeFormat": "Error Code: [%s]",
         "ErrorMessageFormat": "Error: %s",
         "FoundAppSourceDockerfileMessage": "Found existing Dockerfile in provided application source at path '%s'; image will be built from this Dockerfile.",
+        "LogTelemetryFailed": "Unable to log telemetry to Application Insights.",
         "MissingAcrNameMessage": "The acrName argument must also be provided if the appSourcePath argument is provided.",
         "MissingImageToDeployMessage": "The argument imageToDeploy must be provided if neither appSourcePath nor acrName are provided.",
         "PackCliInstallFailed": "Unable to install pack CLI.",
