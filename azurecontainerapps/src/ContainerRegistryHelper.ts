@@ -46,10 +46,11 @@ export class ContainerRegistryHelper {
         tl.debug(`Attempting to push image "${imageToPush}" to ACR`);
         try {
             new Utility().throwIfError(
-                tl.execSync('docker', `push ${imageToPush}`)
+                tl.execSync('docker', `push ${imageToPush}`),
+                tl.loc('PushImageToAcrFailed', imageToPush)
             );
         } catch (err) {
-            tl.error(tl.loc('PushImageToAcrFailed', imageToPush));
+            tl.error(err.message);
             throw err;
         }
     }

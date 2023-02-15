@@ -17,6 +17,7 @@ export class TelemetryHelper {
 
     private scenario: string;
     private result: string;
+    private errorMessage: string;
     private taskStartMilliseconds: number;
 
     constructor(disableTelemetry: boolean) {
@@ -34,8 +35,9 @@ export class TelemetryHelper {
     /**
      * Marks that the task failed in telemetry.
      */
-    public setFailedResult() {
+    public setFailedResult(errorMessage: string) {
         this.result = FAILED_RESULT;
+        this.errorMessage = errorMessage;
     }
 
     /**
@@ -77,13 +79,19 @@ export class TelemetryHelper {
                     scenarioArg = `--property 'scenario=${this.scenario}'`;
                 }
 
+                let errorMessageArg: string = '';
+                if (!util.isNullOrEmpty(this.errorMessage)) {
+                    errorMessageArg = `--property 'errorMessage=${this.errorMessage}'`;
+                }
+
                 const dockerCommand = `run --rm ${ORYX_CLI_IMAGE} /bin/bash -c "oryx telemetry --event-name 'ContainerAppsPipelinesTaskRC' ` +
-                `--processing-time '${taskLengthMilliseconds}' ${resultArg} ${scenarioArg}"`
+                `--processing-time '${taskLengthMilliseconds}' ${resultArg} ${scenarioArg} ${errorMessageArg}"`
                 new Utility().throwIfError(
-                    tl.execSync('docker', dockerCommand)
+                    tl.execSync('docker', dockerCommand),
+                    tl.loc('LogTelemetryFailed')
                 );
             } catch (err) {
-                tl.error(tl.loc('LogTelemetryFailed'));
+                tl.error(err.message);
                 throw err;
             }
         }

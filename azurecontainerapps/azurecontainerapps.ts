@@ -217,7 +217,7 @@ export class azurecontainerapps {
             telemetryHelper.setSuccessfulResult();
         } catch (err) {
             tl.setResult(tl.TaskResult.Failed, err.message);
-            telemetryHelper.setFailedResult();
+            telemetryHelper.setFailedResult(err.message);
         } finally {
             // Logout of Azure if logged in during this task session
             authHelper.logoutAzure();
