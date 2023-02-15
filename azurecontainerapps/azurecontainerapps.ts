@@ -12,11 +12,7 @@ const util = new Utility();
 export class azurecontainerapps {
 
     public static async runMain(): Promise<void> {
-        let disableTelemetry = false;
-        try {
-            disableTelemetry = tl.getBoolInput('disableTelemetry', false);
-        }
-        finally {}
+        let disableTelemetry = tl.getBoolInput('disableTelemetry', false);
 
         // Set up TelemetryHelper for managing telemetry calls
         const telemetryHelper: TelemetryHelper = new TelemetryHelper(disableTelemetry);
@@ -221,12 +217,13 @@ export class azurecontainerapps {
             telemetryHelper.setSuccessfulResult();
         } catch (err) {
             tl.setResult(tl.TaskResult.Failed, err.message);
+            telemetryHelper.setFailedResult();
         } finally {
             // Logout of Azure if logged in during this task session
             authHelper.logoutAzure();
 
-            // Log telemetry for this task run (will do nothing if telemetry was previously disabled)
-            telemetryHelper.log();
+            // If telemetry is enabled, will log metadata for this task run
+            telemetryHelper.sendLogs();
         }
     }
 }

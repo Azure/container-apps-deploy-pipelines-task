@@ -3,8 +3,17 @@ import { Utility } from './Utility';
 
 const ORYX_CLI_IMAGE: string = "mcr.microsoft.com/oryx/cli:debian-buster-20230207.2";
 
+const SUCCESSFUL_RESULT: string = "succeeded";
+const FAILED_RESULT: string = "failed";
+
+const BUILDER_SCENARIO: string = "used-builder";
+const DOCKERFILE_SCENARIO: string = "used-dockerfile";
+const IMAGE_SCENARIO: string = "used-image";
+
+const util = new Utility();
+
 export class TelemetryHelper {
-    readonly disableTelemetry: boolean = false;
+    readonly disableTelemetry: boolean;
 
     private scenario: string;
     private result: string;
@@ -12,49 +21,64 @@ export class TelemetryHelper {
 
     constructor(disableTelemetry: boolean) {
         this.disableTelemetry = disableTelemetry;
-        this.scenario = "N/A";
-        this.result = "failed";
         this.taskStartMilliseconds = Date.now();
     }
 
     /**
-     * Sets the tracked result property to "succeeded".
+     * Marks that the task was successful in telemetry.
      */
     public setSuccessfulResult() {
-        this.result = "succeeded";
+        this.result = SUCCESSFUL_RESULT;
     }
 
     /**
-     * Sets the tracked scenario property to "used-builder".
+     * Marks that the task failed in telemetry.
+     */
+    public setFailedResult() {
+        this.result = FAILED_RESULT;
+    }
+
+    /**
+     * Marks that the task used the builder scenario.
      */
     public setBuilderScenario() {
-        this.scenario = "used-builder";
+        this.scenario = BUILDER_SCENARIO;
     }
 
     /**
-     * Sets the tracked scenario property to "used-dockerfile".
+     * Marks that the task used the Dockerfile scenario.
      */
     public setDockerfileScenario() {
-        this.scenario = "used-dockerfile";
+        this.scenario = DOCKERFILE_SCENARIO;
     }
 
     /**
-     * Sets the tracked scenario property to "used-image".
+     * Marks that the task used the previously built image scenario.
      */
     public setImageScenario() {
-        this.scenario = "used-image";
+        this.scenario = IMAGE_SCENARIO;
     }
 
     /**
      * If telemetry is enabled, uses the "oryx telemetry" command to log metadata about this task execution.
      */
-    public log() {
-        const taskLengthMilliseconds = Date.now() - this.taskStartMilliseconds;
+    public sendLogs() {
+        const taskLengthMilliseconds: number = Date.now() - this.taskStartMilliseconds;
         if (!this.disableTelemetry) {
             tl.debug(`Telemetry enabled; logging metadata about task result, length and scenario targeted.`);
             try {
+                let resultArg: string = '';
+                if (!util.isNullOrEmpty(this.result)) {
+                    resultArg = `--property 'result=${this.result}'`;
+                }
+
+                let scenarioArg: string = '';
+                if (!util.isNullOrEmpty(this.scenario)) {
+                    scenarioArg = `--property 'scenario=${this.scenario}'`;
+                }
+
                 const dockerCommand = `run --rm ${ORYX_CLI_IMAGE} /bin/bash -c "oryx telemetry --event-name 'ContainerAppsPipelinesTaskRC' ` +
-                `--processing-time '${taskLengthMilliseconds}' --property 'result=${this.result}' --property 'scenario=${this.scenario}'"`
+                `--processing-time '${taskLengthMilliseconds}' ${resultArg} ${scenarioArg}"`
                 new Utility().throwIfError(
                     tl.execSync('docker', dockerCommand)
                 );
