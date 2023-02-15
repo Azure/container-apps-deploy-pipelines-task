@@ -72,7 +72,7 @@ export class azurecontainerapps {
             const acrPassword: string = tl.getInput('acrPassword', false);
 
             // Login to ACR if credentials were provided
-            if (!util.isNullOrEmpty(acrUsername) && !util.isNullOrEmpty(acrPassword)) {
+            if (!util.isNullOrEmpty(acrName) && !util.isNullOrEmpty(acrUsername) && !util.isNullOrEmpty(acrPassword)) {
                 console.log(tl.loc('AcrUsernamePasswordLoginMessage'));
                 new ContainerRegistryHelper().loginAcrWithUsernamePassword(acrName, acrUsername, acrPassword);
                 optionalCmdArgs.push(
@@ -82,7 +82,7 @@ export class azurecontainerapps {
             }
 
             // Login to ACR with access token if no credentials were provided
-            if (util.isNullOrEmpty(acrUsername) || util.isNullOrEmpty(acrPassword)) {
+            if (!util.isNullOrEmpty(acrName) && (util.isNullOrEmpty(acrUsername) || util.isNullOrEmpty(acrPassword))) {
                 console.log(tl.loc('AcrAccessTokenLoginMessage'));
                 await new ContainerRegistryHelper().loginAcrWithAccessTokenAsync(acrName);
             }
