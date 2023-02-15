@@ -19,7 +19,7 @@
   "version": {
     "Major": 0,
     "Minor": 1,
-    "Patch": 10
+    "Patch": 11
   },
   "minimumAgentVersion": "2.144.0",
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
@@ -147,6 +147,13 @@
       "label": "ms-resource:loc.input.label.environmentVariables",
       "required": false,
       "helpMarkDown": "ms-resource:loc.input.help.environmentVariables"
+    },
+    {
+      "name": "disableTelemetry",
+      "type": "boolean",
+      "label": "ms-resource:loc.input.label.disableTelemetry",
+      "required": false,
+      "helpMarkDown": "ms-resource:loc.input.help.disableTelemetry"
     }
   ],
   "execution": {
@@ -180,6 +187,7 @@
     "ErrorCodeFormat": "ms-resource:loc.messages.ErrorCodeFormat",
     "ErrorMessageFormat": "ms-resource:loc.messages.ErrorMessageFormat",
     "FoundAppSourceDockerfileMessage": "ms-resource:loc.messages.FoundAppSourceDockerfileMessage",
+    "LogTelemetryFailed": "ms-resource:loc.messages.LogTelemetryFailed",
     "MissingAcrNameMessage": "ms-resource:loc.messages.MissingAcrNameMessage",
     "MissingImageToDeployMessage": "ms-resource:loc.messages.MissingImageToDeployMessage",
     "PackCliInstallFailed": "ms-resource:loc.messages.PackCliInstallFailed",

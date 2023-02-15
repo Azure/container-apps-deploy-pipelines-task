@@ -8,24 +8,6 @@ The `AzureContainerAppsRC` task found in this repository is the _Release Candida
 of this Release Candidate task is to offer users immediate early access to features, bug fixes and patches that will
 eventually be rolled out in the official `AzureContainerApps` task at the end of every three week sprint.
 
-## Running this task on Microsoft-hosted agents
-
-If you are running this task on a
-[Microsoft-hosted agent](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted), you may find that this
-task is _not_ able to run successfully with the following operating systems:
-
-- macOS
-  - The [macOS runners](https://github.com/actions/runner-images#available-images) provided by Microsoft do not come
-  installed with Docker (more information [here](https://github.com/actions/runner-images/issues/17#issuecomment-614726536));
-  as a result, this task is not able to run any `docker` commands, such as pushing the built runnable application images
-  to ACR.
-- Windows
-  - The [Windows runners](https://github.com/actions/runner-images#available-images) provided by Microsoft comes with
-  Docker installed, but by default, Linux-based images are unable to be pulled down; as a result, this task is not able
-  to pull down the Oryx builder to create runnable application images from provided application source.
-
-Please see the below **Docker** prerequisite section for more information.
-
 ## Description
 
 This Azure Pipelines Task allows users to easily deploy their application source to an
@@ -45,6 +27,37 @@ with a call to `docker build` and the Container App will be created or updated b
 
 If a previously built image has already been pushed to the ACR instance and is provided to this task, no application
 source is required and the image will be used when creating or updating the Container App.
+
+## Running this task on Microsoft-hosted agents
+
+If you are running this task on a
+[Microsoft-hosted agent](https://learn.microsoft.com/en-us/azure/devops/pipelines/agents/hosted), you may find that this
+task is _not_ able to run successfully with the following operating systems:
+
+- macOS
+  - The [macOS runners](https://github.com/actions/runner-images#available-images) provided by Microsoft do not come
+  installed with Docker (more information [here](https://github.com/actions/runner-images/issues/17#issuecomment-614726536));
+  as a result, this task is not able to run any `docker` commands, such as pushing the built runnable application images
+  to ACR.
+- Windows
+  - The [Windows runners](https://github.com/actions/runner-images#available-images) provided by Microsoft comes with
+  Docker installed, but by default, Linux-based images are unable to be pulled down; as a result, this task is not able
+  to pull down the Oryx builder to create runnable application images from provided application source.
+
+Please see the below **Docker** prerequisite section for more information.
+
+## Data/Telemetry Collection Notice
+
+By default, this Azure DevOps Task collects the following pieces of data for Microsoft:
+- The Container App build and deploy scenario targeted by the user
+  - _i.e._, used the Oryx++ Builder, used a provided/found Dockerfile, or provided a previously built image
+  - _Note_: the image name is _not_ collected
+- The processing time of the task, in milliseconds
+- The result of the task
+  - _i.e._, succeeded or failed
+- If the Oryx++ Builder is used, events and metrics relating to building the provided application using Oryx
+
+If you want to disable data collection, please set the `disableTelemetry` argument to `true`.
 
 ## Prerequisites
 
@@ -166,6 +179,7 @@ need to be provided in order for this task to successfully run using one of the 
 | `targetPort`              | No       | The target port that the Container App will listen on. If not provided, this value will be "80" for Python applications and "8080" for all other supported platforms. |
 | `location`                | No       | The location that the Container App (and other created resources) will be deployed to. To view locations suitable for creating the Container App in, please run the following: `az provider show -n Microsoft.App --query "resourceTypes[?resourceType=='containerApps'].locations"` |
 | `environmentVariables`    | No       | A list of environment variable(s) for the container. Space-separated values in 'key=value' format. Empty string to clear existing values. Prefix value with 'secretref:' to reference a secret. |
+| `disableTelemetry`        | No       | If set to `true`, no telemetry will be collected by this Azure DevOps Task. If set to `false`, or if this argument is not provided, telemetry will be sent to Microsoft about the Container App build and deploy scenario targeted by this Azure DevOps Task. |
 
 ## Usage
 
