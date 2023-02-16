@@ -91,8 +91,7 @@ export class TelemetryHelper {
                     tl.loc('LogTelemetryFailed')
                 );
             } catch (err) {
-                tl.error(err.message);
-                throw err;
+                tl.warning(`Skipping telemetry logging due to the following exception: ${err.message}`);
             }
         }
     }

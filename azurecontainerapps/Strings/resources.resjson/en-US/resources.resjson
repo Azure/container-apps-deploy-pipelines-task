@@ -36,6 +36,8 @@
   "loc.input.help.location": "The location that the Container App (and other created resources) will be deployed to.",
   "loc.input.label.environmentVariables": "Environment variables",
   "loc.input.help.environmentVariables": "A list of environment variable(s) for the container. Space-separated values in 'key=value' format. Empty string to clear existing values. Prefix value with 'secretref:' to reference a secret.",
+  "loc.input.label.disableTelemetry": "Disable telemetry",
+  "loc.input.help.disableTelemetry": "If set to 'true', no telemetry will be collected by this Azure DevOps Task. If set to 'false', or if this argument is not provided, telemetry will be sent to Microsoft about the Container App build and deploy scenario targeted by this Azure DevOps Task.",
   "loc.messages.AcrAccessTokenAuthFailed": "Unable to authenticate against ACR instance '%s.azurecr.io' with access token.",
   "loc.messages.AcrAccessTokenLoginMessage": "Logging in to Azure Container Registry using access token to be generated via Azure CLI.",
   "loc.messages.AcrUsernamePasswordAuthFailed": "Unable to authenticate against ACR instance '%s.azurecr.io' with username/password.",
