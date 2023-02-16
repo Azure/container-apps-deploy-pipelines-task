@@ -187,7 +187,6 @@
     "ErrorCodeFormat": "ms-resource:loc.messages.ErrorCodeFormat",
     "ErrorMessageFormat": "ms-resource:loc.messages.ErrorMessageFormat",
     "FoundAppSourceDockerfileMessage": "ms-resource:loc.messages.FoundAppSourceDockerfileMessage",
-    "LogTelemetryFailed": "ms-resource:loc.messages.LogTelemetryFailed",
     "MissingAcrNameMessage": "ms-resource:loc.messages.MissingAcrNameMessage",
     "MissingImageToDeployMessage": "ms-resource:loc.messages.MissingImageToDeployMessage",
     "PackCliInstallFailed": "ms-resource:loc.messages.PackCliInstallFailed",

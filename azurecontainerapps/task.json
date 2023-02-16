@@ -187,7 +187,6 @@
         "ErrorCodeFormat": "Error Code: [%s]",
         "ErrorMessageFormat": "Error: %s",
         "FoundAppSourceDockerfileMessage": "Found existing Dockerfile in provided application source at path '%s'; image will be built from this Dockerfile.",
-        "LogTelemetryFailed": "Unable to log telemetry to Application Insights.",
         "MissingAcrNameMessage": "The acrName argument must also be provided if the appSourcePath argument is provided.",
         "MissingImageToDeployMessage": "The argument imageToDeploy must be provided if neither appSourcePath nor acrName are provided.",
         "PackCliInstallFailed": "Unable to install pack CLI.",
