@@ -1,3 +1,4 @@
+import * as os from 'os'
 import * as tl from 'azure-pipelines-task-lib/task';
 import * as tr from 'azure-pipelines-task-lib/toolrunner';
 
@@ -10,7 +11,7 @@ export class CommandHelper {
      * @returns the string output from the command
      */
     public async execCommandAsync(command: string, cwd?: string) : Promise<string> {
-        return tl.getVariable('AGENT.OS') == 'Windows_NT' ?
+        return os.platform() == 'win32' ?
             this.execPwshCommandAsync(command, cwd) :
             this.execBashCommandAsync(command, cwd);
     }
