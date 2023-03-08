@@ -176,7 +176,7 @@ export class azurecontainerapps {
             const containerAppExists: boolean = await appHelper.doesContainerAppExist(containerAppName, resourceGroup);
 
             // Pass the ACR credentials when creating a Container App that doesn't use the YAML file
-            if (!containerAppExists && !shouldOnlyUseYaml) {
+            if (!containerAppExists && !shouldOnlyUseYaml && !util.isNullOrEmpty(acrName) && !util.isNullOrEmpty(acrUsername) && !util.isNullOrEmpty(acrPassword)) {
                 optionalCmdArgs.push(
                     `--registry-server ${acrName}.azurecr.io`,
                     `--registry-username ${acrUsername}`,

@@ -151,7 +151,7 @@ export class ContainerAppHelper {
     public doesContainerAppEnvironmentExist(containerAppEnvironment: string, resourceGroup: string): boolean {
         tl.debug(`Attempting to determine if Container App Environment with name "${containerAppEnvironment}" exists in resource group "${resourceGroup}"`);
         try {
-            const command = `containerapp environment show -n ${containerAppEnvironment} -g ${resourceGroup} -o none`;
+            const command = `containerapp env show -n ${containerAppEnvironment} -g ${resourceGroup} -o none`;
             const result = tl.execSync('az', command);
             return result.code == 0;
         } catch (err) {
