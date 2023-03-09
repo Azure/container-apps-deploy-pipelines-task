@@ -162,18 +162,18 @@ export class azurecontainerapps {
             let location: string = tl.getInput('location', false);
 
             // Ensure that the resource group that the Container App will be created in exists
-            const resourceGroupExists = await appHelper.doesResourceGroupExist(resourceGroup);
+            const resourceGroupExists = appHelper.doesResourceGroupExist(resourceGroup);
             if (!resourceGroupExists) {
                 // If no location was provided, get the default location for the Container App provider
                 if (util.isNullOrEmpty(location)) {
-                    location = await appHelper.getDefaultContainerAppLocation();
+                    location = appHelper.getDefaultContainerAppLocation();
                 }
 
-                await appHelper.createResourceGroup(resourceGroup, location);
+                appHelper.createResourceGroup(resourceGroup, location);
             }
 
             // Determine if the Container App currently exists
-            const containerAppExists: boolean = await appHelper.doesContainerAppExist(containerAppName, resourceGroup);
+            const containerAppExists: boolean = appHelper.doesContainerAppExist(containerAppName, resourceGroup);
 
             // Pass the ACR credentials when creating a Container App that doesn't use the YAML file
             if (!containerAppExists && !shouldOnlyUseYaml && !util.isNullOrEmpty(acrName) && !util.isNullOrEmpty(acrUsername) && !util.isNullOrEmpty(acrPassword)) {
@@ -190,7 +190,7 @@ export class azurecontainerapps {
             // Note: this step should be skipped if we're using properties from the YAML configuration file (YAML uses existing environment)
             let discoveredExistingEnvironment = false;
             if (!containerAppExists && !shouldUseYamlProperties && util.isNullOrEmpty(containerAppEnvironment)) {
-                const existingContainerAppEnvironment: string = await appHelper.getExistingContainerAppEnvironment(resourceGroup);
+                const existingContainerAppEnvironment: string = appHelper.getExistingContainerAppEnvironment(resourceGroup);
                 if (!util.isNullOrEmpty(existingContainerAppEnvironment)) {
                     discoveredExistingEnvironment = true;
                     containerAppEnvironment = existingContainerAppEnvironment;
@@ -208,9 +208,9 @@ export class azurecontainerapps {
             // Determine if the Container App environment currently exists and create one if it doesn't
             // Note: this step should be skipped if we're using properties from the YAML configuration file (YAML uses existing environment)
             if (!containerAppExists && !discoveredExistingEnvironment && !shouldUseYamlProperties) {
-                const containerAppEnvironmentExists: boolean = await appHelper.doesContainerAppEnvironmentExist(containerAppEnvironment, resourceGroup);
+                const containerAppEnvironmentExists: boolean = appHelper.doesContainerAppEnvironmentExist(containerAppEnvironment, resourceGroup);
                 if (!containerAppEnvironmentExists) {
-                    await appHelper.createContainerAppEnvironment(containerAppEnvironment, resourceGroup, location);
+                    appHelper.createContainerAppEnvironment(containerAppEnvironment, resourceGroup, location);
                 }
             }
 
