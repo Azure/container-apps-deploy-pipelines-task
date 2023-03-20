@@ -105,6 +105,7 @@ export class azurecontainerapps {
     private static runtimeStack: string;
     private static ingress: string;
     private static targetPort: string;
+    private static shouldUseUpdateCommand: boolean;
 
     /**
      * Initializes the helpers used by this task.
@@ -228,8 +229,8 @@ export class azurecontainerapps {
 
     /**
      * Gets the name of the resource group to use for the task. If the 'resourceGroup' argument is not provided,
-     * then a default name will be generated in the form '<containerAppName>-rg'. If the resource group does not
-     * exist, it will be created.
+     * then a default name will be generated in the form '<containerAppName>-rg'. If the generated resource group does
+     * not exist, it will be created.
      * @param containerAppName - The name of the Container App to use for the task.
      * @param location - The location to deploy resources to.
      * @returns The name of the resource group to use for the task.
@@ -240,12 +241,12 @@ export class azurecontainerapps {
         if (util.isNullOrEmpty(resourceGroup)) {
             resourceGroup = `${containerAppName}-rg`;
             console.log(tl.loc('DefaultResourceGroupMessage', resourceGroup));
-        }
 
-        // Ensure that the resource group that the Container App will be created in exists
-        const resourceGroupExists = this.appHelper.doesResourceGroupExist(resourceGroup);
-        if (!resourceGroupExists) {
-            this.appHelper.createResourceGroup(resourceGroup, location);
+            // Ensure that the resource group that the Container App will be created in exists
+            const resourceGroupExists = this.appHelper.doesResourceGroupExist(resourceGroup);
+            if (!resourceGroupExists) {
+                this.appHelper.createResourceGroup(resourceGroup, location);
+            }
         }
 
         return resourceGroup;
@@ -408,53 +409,63 @@ export class azurecontainerapps {
     private static setupContainerAppProperties() {
         this.commandLineArgs = [];
 
-        // Pass the ACR credentials when creating a Container App that doesn't use the YAML file
-        if (!this.containerAppExists && !util.isNullOrEmpty(this.acrName) && !util.isNullOrEmpty(this.acrUsername) && !util.isNullOrEmpty(this.acrPassword)) {
+        // Get the ingress inputs
+        this.ingress = tl.getInput('ingress', false);
+        this.targetPort = tl.getInput('targetPort', false);
+
+        // If both ingress and target port were not provided for an existing Container App, or if ingress is to be disabled,
+        // use the 'update' command, otherwise we should use the 'up' command that performs a PATCH operation on the ingress properties.
+        this.shouldUseUpdateCommand = this.containerAppExists &&
+                                      util.isNullOrEmpty(this.targetPort) &&
+                                      (util.isNullOrEmpty(this.ingress) || this.ingress == 'disabled');
+
+        // Pass the ACR credentials when creating a Container App or updating a Container App via the 'up' command
+        if (!util.isNullOrEmpty(this.acrName) && !util.isNullOrEmpty(this.acrUsername) && !util.isNullOrEmpty(this.acrPassword) &&
+            (!this.containerAppExists || (this.containerAppExists && !this.shouldUseUpdateCommand))) {
             this.commandLineArgs.push(
                 `--registry-server ${this.acrName}.azurecr.io`,
                 `--registry-username ${this.acrUsername}`,
                 `--registry-password ${this.acrPassword}`);
         }
 
-        // Get the ingress value if it was provided
-        this.ingress = tl.getInput('ingress', false);
-        this.ingressEnabled = true;
+        // Determine default values only for the 'create' scenario to avoid overriding existing values for the 'update' scenario
+        if (!this.containerAppExists) {
+            this.ingressEnabled = true;
 
-        // Set the ingress value to 'external' if it was not provided
-        if (util.isNullOrEmpty(this.ingress)) {
-            this.ingress = 'external';
-            console.log(tl.loc('DefaultIngressMessage', this.ingress));
-        }
+            // Set the ingress value to 'external' if it was not provided
+            if (util.isNullOrEmpty(this.ingress)) {
+                this.ingress = 'external';
+                console.log(tl.loc('DefaultIngressMessage', this.ingress));
+            }
 
-        // Set the value of ingressEnabled to 'false' if ingress was provided as 'disabled'
-        if (this.ingress == 'disabled') {
-            this.ingressEnabled = false;
-            console.log(tl.loc('DisabledIngressMessage'));
-        }
+            // Set the value of ingressEnabled to 'false' if ingress was provided as 'disabled'
+            if (this.ingress == 'disabled') {
+                this.ingressEnabled = false;
+                console.log(tl.loc('DisabledIngressMessage'));
+            }
 
-        // Handle setup for ingress values when enabled
-        if (this.ingressEnabled) {
-            // Get the target port if provided, or determine it based on the application type
-            this.targetPort = tl.getInput('targetPort', false);
-            if (util.isNullOrEmpty(this.targetPort)) {
-                if (!util.isNullOrEmpty(this.runtimeStack) && this.runtimeStack.startsWith('python:')) {
-                    this.targetPort = '80';
-                } else {
-                    this.targetPort = '8080';
+            // Handle setup for ingress values when enabled
+            if (this.ingressEnabled) {
+                // Get the target port if provided, or determine it based on the application type
+                this.targetPort = tl.getInput('targetPort', false);
+                if (util.isNullOrEmpty(this.targetPort)) {
+                    if (!util.isNullOrEmpty(this.runtimeStack) && this.runtimeStack.startsWith('python:')) {
+                        this.targetPort = '80';
+                    } else {
+                        this.targetPort = '8080';
+                    }
+
+                    console.log(tl.loc('DefaultTargetPortMessage', this.targetPort));
                 }
 
-                console.log(tl.loc('DefaultTargetPortMessage', this.targetPort));
-            }
+                // Set the target port to 80 if it was not provided or determined
+                if (util.isNullOrEmpty(this.targetPort)) {
+                    this.targetPort = '80';
+                    console.log(tl.loc('DefaultTargetPortMessage', this.targetPort));
+                }
 
-            // Set the target port to 80 if it was not provided or determined
-            if (util.isNullOrEmpty(this.targetPort)) {
-                this.targetPort = '80';
-                console.log(tl.loc('DefaultTargetPortMessage', this.targetPort));
-            }
-
-            // Add the ingress value and target port to the optional arguments array
-            // Note: this step should be skipped if we're updating an existing Container App (ingress is enabled via a separate command)
-            if (!this.containerAppExists) {
+                // Add the ingress value and target port to the optional arguments array
+                // Note: this step should be skipped if we're updating an existing Container App (ingress is enabled via a separate command)
                 this.commandLineArgs.push(`--ingress ${this.ingress}`);
                 this.commandLineArgs.push(`--target-port ${this.targetPort}`);
             }
@@ -464,7 +475,9 @@ export class azurecontainerapps {
 
         // Add user-specified environment variables
         if (!util.isNullOrEmpty(environmentVariables)) {
-            if (this.containerAppExists) {
+            // The --replace-env-vars flag is only used for the 'update' command,
+            // otherwise --env-vars is used for 'create' and 'up'
+            if (this.shouldUseUpdateCommand) {
                 this.commandLineArgs.push(`--replace-env-vars ${environmentVariables}`);
             } else {
                 this.commandLineArgs.push(`--env-vars ${environmentVariables}`);
@@ -484,26 +497,33 @@ export class azurecontainerapps {
                 // Create the Container App from command line arguments
                 this.appHelper.createContainerApp(this.containerAppName, this.resourceGroup, this.containerAppEnvironment, this.imageToDeploy, this.commandLineArgs);
             }
-        } else {
-            if (!util.isNullOrEmpty(this.yamlConfigPath)) {
-                // Update the Container App from the YAML configuration file
-                this.appHelper.updateContainerAppFromYaml(this.containerAppName, this.resourceGroup, this.yamlConfigPath);
-            } else {
-                // Update the Container App from command line arguments
-                this.appHelper.updateContainerApp(this.containerAppName, this.resourceGroup, this.imageToDeploy, this.commandLineArgs);
 
-                // Update ingress on the Container App
-                if (this.ingressEnabled) {
-                    this.appHelper.enableContainerAppIngress(this.containerAppName, this.resourceGroup, this.targetPort, this.ingress);
-                } else {
-                    this.appHelper.disableContainerAppIngress(this.containerAppName, this.resourceGroup);
-                }
+            return;
+        }
 
-                // Update the ACR details if provided
-                if (!util.isNullOrEmpty(this.acrName) && !util.isNullOrEmpty(this.acrUsername) && !util.isNullOrEmpty(this.acrPassword)) {
-                    this.appHelper.updateContainerAppRegistryDetails(this.containerAppName, this.resourceGroup, this.acrName, this.acrUsername, this.acrPassword);
-                }
+        if (!util.isNullOrEmpty(this.yamlConfigPath)) {
+            // Update the Container App from the YAML configuration file
+            this.appHelper.updateContainerAppFromYaml(this.containerAppName, this.resourceGroup, this.yamlConfigPath);
+
+            return;
+        }
+
+        if (this.shouldUseUpdateCommand) {
+            // Update the Container App using the 'update' command
+            this.appHelper.updateContainerApp(this.containerAppName, this.resourceGroup, this.imageToDeploy, this.commandLineArgs);
+
+            // Update the ACR details on the existing Container App, if provided as an input
+            if (!util.isNullOrEmpty(this.acrName) && !util.isNullOrEmpty(this.acrUsername) && !util.isNullOrEmpty(this.acrPassword)) {
+                this.appHelper.updateContainerAppRegistryDetails(this.containerAppName, this.resourceGroup, this.acrName, this.acrUsername, this.acrPassword);
             }
+        } else {
+            // Update the Container App using the 'up' command
+            this.appHelper.updateContainerAppWithUp(this.containerAppName, this.resourceGroup, this.imageToDeploy, this.commandLineArgs, this.ingress, this.targetPort);
+        }
+
+        // Disable ingress on the existing Container App, if provided as an input
+        if (this.ingress == 'disabled') {
+            this.appHelper.disableContainerAppIngress(this.containerAppName, this.resourceGroup);
         }
     }
 }

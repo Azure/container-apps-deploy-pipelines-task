@@ -101,6 +101,48 @@ export class ContainerAppHelper {
     }
 
     /**
+     * Updates an existing Azure Container App using the 'az containerapp up' command.
+     * @param containerAppName - the name of the existing Container App
+     * @param resourceGroup - the resource group that the existing Container App is found in
+     * @param imageToDeploy - the name of the runnable application image that the Container App will be based from
+     * @param optionalCmdArgs - a set of optional command line arguments
+     * @param ingress - the ingress that the Container App will be exposed on
+     * @param targetPort - the target port that the Container App will be exposed on
+     */
+    public updateContainerAppWithUp(
+        containerAppName: string,
+        resourceGroup: string,
+        imageToDeploy: string,
+        optionalCmdArgs: string[],
+        ingress?: string,
+        targetPort?: string) {
+            tl.debug(`Attempting to update Container App with name "${containerAppName}" in resource group "${resourceGroup}" based from image "${imageToDeploy}"`);
+            const util = new Utility();
+            try {
+                let command = `containerapp up -n ${containerAppName} -g ${resourceGroup} -i ${imageToDeploy}`;
+                optionalCmdArgs.forEach(function (val: string) {
+                    command += ` ${val}`;
+                });
+
+                if (!util.isNullOrEmpty(ingress)) {
+                    command += ` --ingress ${ingress}`;
+                }
+
+                if (!util.isNullOrEmpty(targetPort)) {
+                    command += ` --target-port ${targetPort}`;
+                }
+
+                util.throwIfError(
+                    tl.execSync('az', command),
+                    tl.loc('UpdateContainerAppFailed')
+                );
+            } catch (err) {
+                tl.error(err.message);
+                throw err;
+            }
+        }
+
+    /**
      * Updates an existing Azure Container App based from a YAML configuration file.
      * @param containerAppName - the name of the existing Container App
      * @param resourceGroup - the resource group that the existing Container App is found in
@@ -249,27 +291,6 @@ export class ContainerAppHelper {
             util.throwIfError(
                 tl.execSync('az', command),
                 tl.loc('CreateContainerAppEnvironmentFailed')
-            );
-        } catch (err) {
-            tl.error(err.message);
-            throw err;
-        }
-    }
-
-    /**
-     * Enables ingress for an existing Azure Container App.
-     * @param name - the name of the Container App
-     * @param resourceGroup - the resource group that the Container App is found in
-     * @param targetPort - the port that the Container App is listening on
-     * @param type - the type of ingress to enable ('internal' or 'external')
-     */
-    public enableContainerAppIngress(name: string, resourceGroup: string, targetPort: string, type: string) {
-        tl.debug(`Attempting to enable ingress for Container App with name "${name}" in resource group "${resourceGroup}"`);
-        try {
-            const command = `containerapp ingress enable -n ${name} -g ${resourceGroup} --target-port ${targetPort} --type ${type}`;
-            new Utility().throwIfError(
-                tl.execSync('az', command),
-                tl.loc('EnableContainerAppIngressFailed')
             );
         } catch (err) {
             tl.error(err.message);
