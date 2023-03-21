@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "AzureContainerAppsRC",
     "name": "Azure Container Apps Deploy (Release Candidate)",
-    "version": "0.1.13",
+    "version": "1.0.0",
     "publisher": "microsoft-oryx",
     "public": true,
     "targets": [
