@@ -512,13 +512,13 @@ export class azurecontainerapps {
         }
 
         if (this.shouldUseUpdateCommand) {
-            // Update the Container App using the 'update' command
-            this.appHelper.updateContainerApp(this.containerAppName, this.resourceGroup, this.imageToDeploy, this.commandLineArgs);
-
             // Update the ACR details on the existing Container App, if provided as an input
             if (!util.isNullOrEmpty(this.acrName) && !util.isNullOrEmpty(this.acrUsername) && !util.isNullOrEmpty(this.acrPassword)) {
                 this.appHelper.updateContainerAppRegistryDetails(this.containerAppName, this.resourceGroup, this.acrName, this.acrUsername, this.acrPassword);
             }
+
+            // Update the Container App using the 'update' command
+            this.appHelper.updateContainerApp(this.containerAppName, this.resourceGroup, this.imageToDeploy, this.commandLineArgs);
         } else {
             // Update the Container App using the 'up' command
             this.appHelper.updateContainerAppWithUp(this.containerAppName, this.resourceGroup, this.imageToDeploy, this.commandLineArgs, this.ingress, this.targetPort);
