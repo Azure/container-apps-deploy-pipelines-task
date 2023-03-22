@@ -204,6 +204,9 @@ export class azurecontainerapps {
         let containerAppName: string = tl.getInput('containerAppName', false);
         if (util.isNullOrEmpty(containerAppName)) {
             containerAppName = `ado-task-app-${this.buildId}-${this.buildNumber}`;
+
+            // Replace all '.' characters with '-' characters in the Container App name
+            containerAppName = containerAppName.replace(/\./gi, "-");
             console.log(tl.loc('DefaultContainerAppNameMessage', containerAppName));
         }
 

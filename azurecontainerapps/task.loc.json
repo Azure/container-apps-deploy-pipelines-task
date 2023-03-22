@@ -183,6 +183,7 @@
     "AcrAccessTokenLoginMessage": "ms-resource:loc.messages.AcrAccessTokenLoginMessage",
     "AcrUsernamePasswordAuthFailed": "ms-resource:loc.messages.AcrUsernamePasswordAuthFailed",
     "AcrUsernamePasswordLoginMessage": "ms-resource:loc.messages.AcrUsernamePasswordLoginMessage",
+    "AzureCliDynamicInstallFailed": "ms-resource:loc.messages.AzureCliDynamicInstallFailed",
     "BashCommandFailed": "ms-resource:loc.messages.BashCommandFailed",
     "CheckForAppSourceDockerfileMessage": "ms-resource:loc.messages.CheckForAppSourceDockerfileMessage",
     "ContainerAppEnvironmentUsedMessage": "ms-resource:loc.messages.ContainerAppEnvironmentUsedMessage",

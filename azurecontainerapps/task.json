@@ -183,6 +183,7 @@
         "AcrAccessTokenLoginMessage": "Logging in to Azure Container Registry using access token to be generated via Azure CLI.",
         "AcrUsernamePasswordAuthFailed": "Unable to authenticate against ACR instance '%s.azurecr.io' with username/password.",
         "AcrUsernamePasswordLoginMessage": "Logging in to Azure Container Registry using provided acrUsername and acrPassword arguments.",
+        "AzureCliDynamicInstallFailed": "Unable to set the Azure CLI to dynamically install missing extensions.",
         "BashCommandFailed": "Unable to run provided bash command '%s'.",
         "CheckForAppSourceDockerfileMessage": "No dockerfilePath argument provided; checking for 'Dockerfile' at the root of app source path '%s' to build image from.",
         "ContainerAppEnvironmentUsedMessage": "Using the provided containerAppEnvironment value provided '%s' when deploying the Container App.",
