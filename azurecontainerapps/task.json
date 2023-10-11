@@ -6,7 +6,7 @@
     "description": "An Azure DevOps Task to build and deploy Azure Container Apps.",
     "author": "Microsoft Corporation",
     "helpMarkDown": "[Learn more about this task](http://github.com/Azure/container-apps-deploy-pipelines-task)",
-    "releaseNotes": "Update telemetry caller ID to reflect new version of RC task.",
+    "releaseNotes": "Hide output from select 'az containerapp' command calls.",
     "category": "Deploy",
     "visibility": [
         "Build",
@@ -19,7 +19,7 @@
     "version": {
         "Major": 1,
         "Minor": 0,
-        "Patch": 1
+        "Patch": 3
     },
     "minimumAgentVersion": "2.144.0",
     "instanceNameFormat": "Azure Container Apps Deploy (Release Candidate)",
