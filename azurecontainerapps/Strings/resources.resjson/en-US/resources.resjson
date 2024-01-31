@@ -3,7 +3,7 @@
   "loc.helpMarkDown": "[Learn more about this task](http://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/AzureContainerAppsV0/README.md)",
   "loc.description": "An Azure DevOps Task to build and deploy Azure Container Apps.",
   "loc.instanceNameFormat": "Azure Container Apps Deploy (Release Candidate)",
-  "loc.releaseNotes": "Update telemetry caller ID to reflect new version of RC task.",
+  "loc.releaseNotes": "Fixed Http 400 error and ingress update error when using MI to update apps.",
   "loc.input.label.cwd": "Working Directory",
   "loc.input.help.cwd": "Current working directory where the script is run.  Empty is the root of the repo (build) or artifacts (release), which is $(System.DefaultWorkingDirectory)",
   "loc.input.label.appSourcePath": "Application source path",
