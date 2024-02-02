@@ -159,7 +159,7 @@ export class ContainerAppHelper {
             try {
                 let command = `containerapp ingress update -n ${containerAppName} -g ${resourceGroup}`;
                 if (!util.isNullOrEmpty(ingress)) {
-                    command += ` --ingress ${ingress}`;
+                    command += ` --type ${ingress}`;
                 }
 
                 if (!util.isNullOrEmpty(targetPort)) {

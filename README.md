@@ -74,7 +74,7 @@ Services tab in the settings section. Add the Azure subscription to use in the B
 opening the Account Administration screen (gear icon on the top-right of the screen) and then click on the Services Tab.
 
 Create the [ARM](https://azure.microsoft.com/en-in/documentation/articles/resource-group-overview/) service endpoint and
-use the **'Azure Resource Manager'** endpoint type; for more information on creating service connections, please follow
+use the **'Azure Resource Manager'** endpoint type and choose **Service Principal** authentication method; for more information on creating service connections, please follow
 [this document](https://learn.microsoft.com/en-us/azure/devops/pipelines/library/service-endpoints).
 
 ### Azure CLI
