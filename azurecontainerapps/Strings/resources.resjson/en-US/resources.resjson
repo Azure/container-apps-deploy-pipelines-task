@@ -3,7 +3,7 @@
   "loc.helpMarkDown": "[Learn more about this task](http://github.com/microsoft/azure-pipelines-tasks/blob/master/Tasks/AzureContainerAppsV0/README.md)",
   "loc.description": "An Azure DevOps Task to build and deploy Azure Container Apps.",
   "loc.instanceNameFormat": "Azure Container Apps Deploy (Release Candidate)",
-  "loc.releaseNotes": "Update telemetry caller ID to reflect new version of RC task.",
+  "loc.releaseNotes": "Fixed Http 400 error and ingress update error when using MI to update apps.",
   "loc.input.label.cwd": "Working Directory",
   "loc.input.help.cwd": "Current working directory where the script is run.  Empty is the root of the repo (build) or artifacts (release), which is $(System.DefaultWorkingDirectory)",
   "loc.input.label.appSourcePath": "Application source path",
@@ -80,6 +80,7 @@
   "loc.messages.PushImageToAcrFailed": "Unable to push image '%s' to ACR.",
   "loc.messages.SetDefaultBuilderFailed": "Unable to set the Oryx++ Builder as the default builder.",
   "loc.messages.UpdateContainerAppFailed": "Unable to update Azure Container App via 'az containerapp update' command.",
+  "loc.messages.UpdateContainerAppIngressFailed": "Unable to update Azure Container App ingress via 'az containerapp ingress update' command.",
   "loc.messages.UpdateContainerAppFromYamlFailed": "Unable to update Azure Container App from YAML configuration file via 'az containerapp update' command.",
   "loc.messages.UpdateContainerAppRegistryDetailsFailed": "Unable to update Azure Container App ACR details via 'az containerapp registry set' command."
 }

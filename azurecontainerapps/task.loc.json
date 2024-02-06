@@ -19,7 +19,7 @@
   "version": {
     "Major": 1,
     "Minor": 0,
-    "Patch": 1
+    "Patch": 4
   },
   "minimumAgentVersion": "2.144.0",
   "instanceNameFormat": "ms-resource:loc.instanceNameFormat",
@@ -217,6 +217,7 @@
     "PushImageToAcrFailed": "ms-resource:loc.messages.PushImageToAcrFailed",
     "SetDefaultBuilderFailed": "ms-resource:loc.messages.SetDefaultBuilderFailed",
     "UpdateContainerAppFailed": "ms-resource:loc.messages.UpdateContainerAppFailed",
+    "UpdateContainerAppIngressFailed": "ms-resource:loc.messages.UpdateContainerAppIngressFailed",
     "UpdateContainerAppFromYamlFailed": "ms-resource:loc.messages.UpdateContainerAppFromYamlFailed",
     "UpdateContainerAppRegistryDetailsFailed": "ms-resource:loc.messages.UpdateContainerAppRegistryDetailsFailed"
   }
