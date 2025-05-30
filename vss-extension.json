@@ -2,7 +2,7 @@
     "manifestVersion": 1,
     "id": "AzureContainerAppsRC",
     "name": "Azure Container Apps Deploy (Release Candidate)",
-    "version": "1.0.4",
+    "version": "1.0.7",
     "publisher": "microsoft-oryx",
     "public": true,
     "targets": [
@@ -30,6 +30,9 @@
         },
         "support": {
             "uri": "https://github.com/azure/container-apps-deploy-pipelines-task/issues"
+        },
+        "license": {
+            "uri": "https://github.com/Azure/container-apps-deploy-pipelines-task/blob/main/LICENSE"
         }
     },
     "icons": {
